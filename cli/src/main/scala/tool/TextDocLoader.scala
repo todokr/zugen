@@ -1,19 +1,21 @@
 package tool
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 
+import scala.collection.JavaConverters._
 import scala.meta.internal.semanticdb
 import scala.meta.internal.semanticdb.TextDocument
-import scala.collection.JavaConverters._
+
+import tool.Config.TargetProjectRootPath
 
 object TextDocLoader {
 
   /**
     * SemanticDBからTextDocumentをロードする。
     */
-  def load(config: TextDocLoaderConfig): Seq[TextDocument] = {
+  def load(rootPath: TargetProjectRootPath): Seq[TextDocument] = {
     val semanticdbRoot =
-      Paths.get(config.rootPath).resolve("META-INF").resolve("semanticdb")
+      rootPath.value.resolve("META-INF").resolve("semanticdb")
     val semanticdbFiles = Files
       .walk(semanticdbRoot)
       .iterator()
@@ -25,6 +27,4 @@ object TextDocLoader {
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
   }
-
-  final case class TextDocLoaderConfig(rootPath: String)
 }

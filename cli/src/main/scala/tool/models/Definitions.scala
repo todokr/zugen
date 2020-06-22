@@ -1,19 +1,39 @@
 package tool.models
 
+import tool.Config.TargetPackageName
 import tool.models.Definitions._
+import tool.models.DocumentMaterial.DocumentMaterialElement
 import tool.models.Modifiers.ModifierElement
 import tool.models.References.Reference.{Inheritance, Property}
 
 /**
-  * classやtraitのブロック
+  * classやtraitの定義ブロック
   */
 case class Definitions(blocks: Seq[DefinitionBlock]) {
 
   /**
     * 指定されたパッケージに含まれるブロックのみに絞り込む
     */
-  def filterPackages(targetPackages: Seq[String]): Seq[DefinitionBlock] =
-    blocks.filter(_.pkg.isInAnyPackage(targetPackages))
+  def filterPackages(targetPackages: Seq[TargetPackageName]): Definitions =
+    Definitions(blocks.filter(_.pkg.isInAnyPackage(targetPackages.map(_.value))))
+
+  /**
+    * Scaladocとマージして、ドキュメントの生成元データを組み立てる
+    */
+  def mergeWithScaladoc(scaladocs: Scaladocs): DocumentMaterial = {
+    val intermediateElms =
+      blocks
+        .map { definition =>
+          val references = definition.resolveReferences(this)
+          DocumentMaterialElement(
+            definition = definition,
+            scaladoc = scaladocs.findDocForDefinition(definition),
+            references = references
+          )
+        }
+
+    DocumentMaterial(intermediateElms)
+  }
 }
 
 object Definitions {

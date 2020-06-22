@@ -1,0 +1,25 @@
+@(domainObjectDoc: Document.DomainObjectTableDoc)
+@main("Domain objects") {
+  <h1>Domain objects</h1>
+<table>
+  <thead>
+    <tr>
+      <td>package</td>
+      <td>name</td>
+      <td>scaladoc</td>
+      <td>file name</td>
+    </tr>
+  </thead>
+  <tbody>
+  @for(row <- domainObjectDoc.rows) {
+    <tr>
+      <td>@row.pkg</td>
+      <td>@row.name</td>
+      <td>@row.scaladoc</td>
+      <td>@row.fileName</td>
+    </tr>
+  }
+  </tbody>
+</table>
+
+}

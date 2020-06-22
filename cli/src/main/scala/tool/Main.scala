@@ -1,44 +1,23 @@
 package tool
 
-import tool.TextDocLoader.TextDocLoaderConfig
-import tool.models.DocumentIntermediate
+import java.nio.file.Paths
 
-final case class TargetPackageName(value: String) extends AnyVal
-
-class CodeInfoLoader {
-
-  def load(config: LoadConfig): Seq[DocumentIntermediate] = ???
-
-  final case class LoadConfig(targetPackageNames: Seq[TargetPackageName])
-}
+import tool.Config.{DocumentPath, DocumentType, DocumentsToGenerate, TargetPackageName, TargetProjectRootPath}
 
 object Main {
 
   def main(args: Array[String]): Unit = {
-    val targetPackageNames = Seq("example.domain")
+
     args.toList match {
-      case rootPath :: Nil =>
-        val textDocLoaderConfig = TextDocLoaderConfig(rootPath)
-        val textDocs = TextDocLoader.load(textDocLoaderConfig)
-
-        val scaladocs = ScaladocExtractor.extractScaladocs(textDocs)
-        val definitions = DefinitionExtractor.extractDefinitions(textDocs)
-
-        val documentedDefinitions =
-          definitions
-            .filterPackages(targetPackageNames)
-            .map { definition =>
-              val references = definition.resolveReferences(definitions)
-              models.DocumentIntermediate(
-                definition = definition,
-                scaladoc = scaladocs.findDocForDefinition(definition),
-                references = references
-              )
-            }
-
-        documentedDefinitions.foreach(println)
+      case rootPath :: docPath :: Nil =>
+        val targetProjectRootPath = TargetProjectRootPath(Paths.get(rootPath))
+        val targetPackageNames = Seq("example.domain").map(TargetPackageName) // TODO
+        val documentsToGenerate = DocumentsToGenerate(Seq(DocumentType.DomainObjectTable))
+        val documentPath = DocumentPath(Paths.get(docPath)) // TODO
+        val config = Config(targetProjectRootPath, targetPackageNames, documentsToGenerate, documentPath)
+        Zugen.run(config)
       case els =>
-        sys.error(s"Expected <path>, obtained $els")
+        sys.error(s"Expected <rootPath>, obtained $els")
     }
   }
 }
