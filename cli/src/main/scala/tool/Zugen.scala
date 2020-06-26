@@ -2,9 +2,9 @@ package tool
 
 import java.nio.file.Files
 
-import tool.Config.DocumentType.{DomainObjectTable, DomainPackageRelationDiagram}
-import tool.Config.{DocumentPath, DocumentType}
-import tool.Document.{DomainObjectTableDoc, DomainPackageRelationDiagramDoc}
+import tool.Config.GenDocumentType.{GenDomainObjectTable, GenDomainPackageRelationDiagram}
+import tool.Config.GenDocumentType
+import tool.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
 import tool.models.DocumentWriter.WrittenDocumentPath
 import tool.models.{DocumentMaterial, DocumentWriter}
 
@@ -17,12 +17,11 @@ object Zugen {
     val definitions =
       DefinitionExtractor
         .extractDefinitions(textDocs)
-        .filterPackages(config.targetPackageNames)
     val scaladocs = ScaladocExtractor.extractScaladocs(textDocs)
     val documentMaterial = definitions.mergeWithScaladoc(scaladocs)
 
     implicit val writer: DocumentWriter = DocumentWriterImpl
-    config.documentsToGenerate.docTypes.foreach { docType =>
+    config.documentsToGenerate.genDocTypes.foreach { docType =>
       val writtenDocumentPath = documentMaterial.writeDocument(docType)
       println(s"${docType} wrote: ${writtenDocumentPath.value.toAbsolutePath}")
     }
@@ -33,15 +32,15 @@ object DocumentWriterImpl extends DocumentWriter {
 
   override def write(
       documentMaterial: DocumentMaterial,
-      documentType: DocumentType,
-      documentPath: DocumentPath): WrittenDocumentPath = {
+      documentType: GenDocumentType,
+      config: Config): WrittenDocumentPath = {
 
     val doc = documentType match {
-      case DomainObjectTable            => DomainObjectTableDoc.of(documentMaterial)
-      case DomainPackageRelationDiagram => DomainPackageRelationDiagramDoc.of(documentMaterial)
+      case GenDomainObjectTable            => DomainObjectTableDoc.of(documentMaterial)
+      case GenDomainPackageRelationDiagram => DomainRelationDiagramDoc.of(documentMaterial, config)
     }
 
-    val filePath = documentPath.value.resolve(s"$documentType.html")
+    val filePath = config.documentPath.value.resolve(s"${doc.docName}.html")
 
     Files.write(filePath, doc.serialize)
     WrittenDocumentPath(filePath)

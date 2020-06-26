@@ -21,7 +21,7 @@ object ScaladocExtractor {
       comments.flatMap { comment =>
         ScaladocParser
           .parseScaladoc(comment)
-          .getOrElse(throw new Exception("failed to parse scaladoc"))
+          .getOrElse(Seq.empty)
           .collect {
             case DocToken(_, _, Some(body)) =>
               ScaladocBlock(

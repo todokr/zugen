@@ -24,5 +24,13 @@ sealed abstract class ProductCategory(code: String)
   * 食品
   */
 case object Food extends ProductCategory("FOOD")
+
+/**
+  * 家具
+  */
 case object Furniture extends ProductCategory("FURNITURE")
-case class Hoge(value: Int) extends ProductCategory("HOGE")
+
+/**
+  * 電化製品
+  */
+case object ElectricAppliance extends ProductCategory("ELECTRIC_APPLIANCE")

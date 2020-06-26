@@ -1,13 +1,12 @@
 package example.domain.shipping
 
+import example.badreference.SomeClass
 import example.domain.order.Order
 
 /**
   * 配送
   */
-case class Shipping(id: ShippingId,
-                    order: Order,
-                    shippingAddress: ShippingAddress)
+case class Shipping(id: ShippingId, order: Order, shippingAddress: ShippingAddress, someClass: SomeClass)
 
 /**
   * 配送ID

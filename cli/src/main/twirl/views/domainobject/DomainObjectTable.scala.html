@@ -1,13 +1,15 @@
-@(domainObjectDoc: Document.DomainObjectTableDoc)
+@import views.html.main
+@import tool.document.Document.DomainObjectTableDoc
+@(domainObjectDoc: DomainObjectTableDoc)
 @main("Domain objects") {
   <h1>Domain objects</h1>
 <table>
   <thead>
     <tr>
-      <td>package</td>
-      <td>name</td>
-      <td>scaladoc</td>
-      <td>file name</td>
+      <th>package</th>
+      <th>name</th>
+      <th>scaladoc</th>
+      <th>file name</th>
     </tr>
   </thead>
   <tbody>

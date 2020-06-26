@@ -9,11 +9,11 @@ case class Parents(elms: Seq[Parent])
 
 object Parents {
 
-  case class Parent(typeName: Parent.TypeName) {
-    override def toString: String = typeName.value
+  case class Parent(tpe: Parent.Tpe) {
+    override def toString: String = tpe.typeName
   }
 
   object Parent {
-    case class TypeName(value: String) extends AnyVal
+    case class Tpe(typeName: String, pkg: Package)
   }
 }

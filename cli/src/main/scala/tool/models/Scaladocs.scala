@@ -20,5 +20,8 @@ object Scaladocs {
   /**
     * Scaladocのブロック
     */
-  case class ScaladocBlock(fileName: FileName, startLine: Int, endLine: Int, content: String)
+  case class ScaladocBlock(fileName: FileName, startLine: Int, endLine: Int, content: String) {
+
+    def firstLine: String = content.split("\n").head
+  }
 }

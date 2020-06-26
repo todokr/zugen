@@ -6,7 +6,7 @@ import tool.Config.{DocumentPath, DocumentsToGenerate, TargetPackageName, Target
 
 final case class Config(
     targetProjectRootPath: TargetProjectRootPath,
-    targetPackageNames: Seq[TargetPackageName],
+    domainPackages: Seq[TargetPackageName],
     documentsToGenerate: DocumentsToGenerate,
     documentPath: DocumentPath
 )
@@ -26,7 +26,7 @@ object Config {
   /**
     * 生成するドキュメント
     */
-  final case class DocumentsToGenerate(docTypes: Seq[DocumentType])
+  final case class DocumentsToGenerate(genDocTypes: Seq[GenDocumentType])
 
   /**
     * 生成したドキュメントを配置するパス
@@ -39,11 +39,11 @@ object Config {
   /**
     * ドキュメント種別
     */
-  sealed trait DocumentType
+  sealed trait GenDocumentType
 
-  object DocumentType {
-    case object DomainObjectTable extends DocumentType
-    case object DomainPackageRelationDiagram extends DocumentType
+  object GenDocumentType {
+    case object GenDomainObjectTable extends GenDocumentType
+    case object GenDomainPackageRelationDiagram extends GenDocumentType
   }
 
 }

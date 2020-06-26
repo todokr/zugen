@@ -8,10 +8,10 @@ import tool.models.Package.PackageElement
 case class Package(elems: Seq[PackageElement]) {
 
   /**
-    * 指定されたパッケージのいずれかに含まれるならtrue
+    * 指定されたパッケージに含まれるならtrue
     */
-  def isInAnyPackage(packageNames: Seq[String]): Boolean =
-    packageNames.exists(p => toString.startsWith(p))
+  def isInPackage(other: Package): Boolean =
+    toString.startsWith(other.toString)
 
   override def toString: String = elems.map(_.value).mkString(".")
 }

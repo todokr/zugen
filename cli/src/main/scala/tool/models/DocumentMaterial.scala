@@ -3,7 +3,7 @@ package tool.models
 import java.nio.file.Files
 
 import tool.Config
-import tool.Config.DocumentType
+import tool.Config.GenDocumentType
 import tool.models.Definitions.DefinitionBlock
 import tool.models.Definitions.DefinitionBlock.{ClassDefinitionBlock, ObjectDefinitionBlock, TraitDefinitionBlock}
 import tool.models.DocumentMaterial.DocumentMaterialElement
@@ -16,14 +16,14 @@ import tool.models.Scaladocs.ScaladocBlock
 case class DocumentMaterial(elms: Seq[DocumentMaterialElement]) {
 
   /**
-    * ドキュメントや図を書き出す。
+    * ドキュメントや図を書き出す
     */
   def writeDocument(
-      documentType: DocumentType)(implicit writer: DocumentWriter, config: Config): WrittenDocumentPath = {
+      documentType: GenDocumentType)(implicit writer: DocumentWriter, config: Config): WrittenDocumentPath = {
     if (!config.documentPath.exists) {
       Files.createDirectories(config.documentPath.value)
     }
-    writer.write(this, documentType, config.documentPath)
+    writer.write(this, documentType, config)
   }
 }
 

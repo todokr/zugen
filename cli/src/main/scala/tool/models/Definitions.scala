@@ -1,21 +1,15 @@
 package tool.models
 
-import tool.Config.TargetPackageName
 import tool.models.Definitions._
 import tool.models.DocumentMaterial.DocumentMaterialElement
 import tool.models.Modifiers.ModifierElement
-import tool.models.References.Reference.{Inheritance, Property}
+import tool.models.References.ExternalReference.ExternalInheritance
+import tool.models.References.InternalReference.{InternalInheritance, InternalProperty}
 
 /**
   * classやtraitの定義ブロック
   */
 case class Definitions(blocks: Seq[DefinitionBlock]) {
-
-  /**
-    * 指定されたパッケージに含まれるブロックのみに絞り込む
-    */
-  def filterPackages(targetPackages: Seq[TargetPackageName]): Definitions =
-    Definitions(blocks.filter(_.pkg.isInAnyPackage(targetPackages.map(_.value))))
 
   /**
     * Scaladocとマージして、ドキュメントの生成元データを組み立てる
@@ -48,19 +42,26 @@ object Definitions {
     val endLine: Int
 
     /**
-      * 継承やコンストラクタにおける他のクラスやトレイトへの参照を、渡された定義ブロックの集合から解決する
-      * @todo 同一名の定義ブロックがあると参照を間違って解決してしまう。本当はimportを見た上でDefintionBlockを絞り込まないといけない。
-      * @todo 参照を解決できないパターンに対応する必要がある？
+      * 継承やコンストラクタにおける他のクラスやトレイトへの参照を解決する。
+      * 参照先が定義ブロック内で解決できればドキュメント生成対象パッケージ内部の参照、解決できなければ外部への参照として扱う。
       */
     def resolveReferences(from: Definitions): References = {
       val inheritances = parents.elms
-        .map(_.typeName.value)
-        .map { typeName =>
-          from.blocks.find(_.name.value == typeName)
+        .map { parent =>
+          val defBlock = from.blocks.find(b => b.pkg == parent.tpe.pkg && b.name.value == parent.tpe.typeName)
+          defBlock -> parent.tpe
         }
-        .collect { case Some(x) => Inheritance(x) }
+        .collect {
+          case (Some(block), _) => InternalInheritance(block)
+          case (None, tpe)      => ExternalInheritance(tpe.pkg, tpe.typeName)
+        }
       References(inheritances)
     }
+
+    /**
+      * 指定されたパッケージのいずれかに含まれている際にtrue
+      */
+    def isInAnyPackage(targets: Seq[Package]): Boolean = targets.exists(pkg.isInPackage)
   }
 
   object DefinitionBlock {
@@ -78,17 +79,23 @@ object Definitions {
 
       override def resolveReferences(from: Definitions): References = {
         val inheritances = parents.elms
-          .map(_.typeName.value)
-          .map { typeName =>
-            from.blocks.find(_.name.value == typeName)
+          .map { parent =>
+            val defBlock = from.blocks.find(b => b.pkg == parent.tpe.pkg && b.name.value == parent.tpe.typeName)
+            defBlock -> parent.tpe
           }
-          .collect { case Some(x) => Inheritance(x) }
+          .collect {
+            case (Some(block), _) => InternalInheritance(block)
+            case (None, tpe)      => ExternalInheritance(tpe.pkg, tpe.typeName)
+          }
         val properties = constructor.args
-          .map(_.typeName.value)
-          .map { typeName =>
-            from.blocks.find(_.name.value == typeName)
+          .map { arg =>
+            val defBlock = from.blocks.find(b => b.pkg == arg.tpe.pkg && b.name.value == arg.tpe.typeName)
+            defBlock -> arg.tpe
           }
-          .collect { case Some(x) => Property(x) }
+          .collect {
+            case (Some(block), _) => InternalProperty(block)
+            case (None, tpe)      => ExternalInheritance(tpe.pkg, tpe.typeName)
+          }
         References(inheritances ++ properties)
       }
 

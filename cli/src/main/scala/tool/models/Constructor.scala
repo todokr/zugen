@@ -9,9 +9,9 @@ case class Constructor(args: Seq[Arg])
 
 object Constructor {
 
-  case class Arg(name: ArgName, typeName: TypeName) {
-    override def toString: String = s"${name.value}: ${typeName.value}"
+  case class Arg(name: ArgName, tpe: Tpe) {
+    override def toString: String = s"${name.value}: ${tpe.typeName}"
   }
   case class ArgName(value: String) extends AnyVal
-  case class TypeName(value: String) extends AnyVal
+  case class Tpe(typeName: String, pkg: Package)
 }

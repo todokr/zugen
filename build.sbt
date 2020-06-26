@@ -1,13 +1,5 @@
 inThisBuild(List(scalaVersion := "2.12.4"))
 
-commands += Command.command("runAll") { s =>
-  val targetRootPath = classDirectory.in(example, Compile).value
-  val docPath = baseDirectory.in(example).value / "zugen-docs"
-  "example/compile" ::
-    s"cli/run $targetRootPath $docPath" ::
-    s
-}
-
 lazy val example = project
   .settings(
     addCompilerPlugin(
@@ -22,3 +14,24 @@ lazy val cli = project
     TwirlKeys.templateImports += "tool._"
   )
   .enablePlugins(SbtTwirl)
+
+val docPath = file("example/zugen-docs")
+commands ++= Seq(
+  Command.command("runAll") { s =>
+    val targetRootPath = classDirectory.in(example, Compile).value
+    "example/compile" ::
+      s"cli/run $targetRootPath $docPath" ::
+      "copyAssets" ::
+      s
+  },
+  Command.command("copyAssets") { s =>
+    val fromDirectory = resourceDirectory.in(cli, Compile).value / "assets"
+    val toDirectory = docPath / "assets"
+    IO.createDirectory(toDirectory)
+    IO.copyDirectory(
+      fromDirectory,
+      toDirectory,
+      CopyOptions(overwrite = true, preserveLastModified = false, preserveExecutable = false))
+    s
+  }
+)

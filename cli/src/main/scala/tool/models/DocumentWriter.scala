@@ -2,15 +2,13 @@ package tool.models
 
 import java.nio.file.Path
 
-import tool.Config.{DocumentPath, DocumentType}
+import tool.Config
+import tool.Config.GenDocumentType
 import tool.models.DocumentWriter.WrittenDocumentPath
 
 trait DocumentWriter {
 
-  def write(
-      intermediates: DocumentMaterial,
-      documentType: DocumentType,
-      documentPath: DocumentPath): WrittenDocumentPath
+  def write(intermediates: DocumentMaterial, documentType: GenDocumentType, config: Config): WrittenDocumentPath
 }
 
 object DocumentWriter {
