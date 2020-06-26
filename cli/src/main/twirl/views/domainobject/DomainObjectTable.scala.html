@@ -3,25 +3,24 @@
 @(domainObjectDoc: DomainObjectTableDoc)
 @main("Domain objects") {
   <h1>Domain objects</h1>
-<table>
-  <thead>
-    <tr>
-      <th>package</th>
-      <th>name</th>
-      <th>scaladoc</th>
-      <th>file name</th>
-    </tr>
-  </thead>
-  <tbody>
-  @for(row <- domainObjectDoc.rows) {
-    <tr>
-      <td>@row.pkg</td>
-      <td>@row.name</td>
-      <td>@row.scaladoc</td>
-      <td>@row.fileName</td>
-    </tr>
-  }
-  </tbody>
-</table>
-
-}
+  <table>
+    <thead>
+      <tr>
+        <th>package</th>
+        <th>name</th>
+        <th>scaladoc</th>
+        <th>file name</th>
+      </tr>
+    </thead>
+    <tbody>
+    @for(row <- domainObjectDoc.rows) {
+      <tr>
+        <td>@row.pkg</td>
+        <td>@row.name</td>
+        <td>@row.scaladoc</td>
+        <td>@row.fileName</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+}()

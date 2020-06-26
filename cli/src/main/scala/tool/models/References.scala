@@ -1,7 +1,5 @@
 package tool.models
 
-import scala.tools.ant.Scaladoc
-
 import tool.models.Definitions.DefinitionBlock
 import tool.models.References.Reference
 

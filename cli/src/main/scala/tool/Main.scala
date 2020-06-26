@@ -17,7 +17,7 @@ object Main {
         val documentPath = DocumentPath(Paths.get(docPath)) // TODO
         val config =
           Config(targetProjectRootPath, targetPackageNames, documentsToGenerate, documentPath)
-        Zugen.run(config)
+        Zugen.generateDoc(config)
       case els =>
         sys.error(s"Expected <rootPath>, obtained $els")
     }

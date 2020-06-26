@@ -2,8 +2,7 @@
 @import tool.document.Document.DomainRelationDiagramDoc.{DomainInternalEdge, DomainExternalEdge}
 
 @(digraph: Digraph)
-digraph node_sample {
-  //graph settings
+digraph domain_relation_diagram {
   graph [
     charset = "UTF-8";
     label = "@digraph.label",

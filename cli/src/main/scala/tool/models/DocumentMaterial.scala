@@ -4,10 +4,10 @@ import java.nio.file.Files
 
 import tool.Config
 import tool.Config.GenDocumentType
+import tool.document.DocumentWriter
+import tool.document.DocumentWriter.WrittenDocumentPath
 import tool.models.Definitions.DefinitionBlock
-import tool.models.Definitions.DefinitionBlock.{ClassDefinitionBlock, ObjectDefinitionBlock, TraitDefinitionBlock}
 import tool.models.DocumentMaterial.DocumentMaterialElement
-import tool.models.DocumentWriter.WrittenDocumentPath
 import tool.models.Scaladocs.ScaladocBlock
 
 /**
@@ -37,41 +37,5 @@ object DocumentMaterial {
   case class DocumentMaterialElement(
       definition: DefinitionBlock,
       references: References,
-      scaladoc: Option[ScaladocBlock]) {
-
-    override def toString: String = {
-      val defType = definition match {
-        case c: ClassDefinitionBlock =>
-          if (c.isCaseClass) "case class" else "class"
-        case _: TraitDefinitionBlock  => "trait"
-        case _: ObjectDefinitionBlock => "object"
-      }
-
-      val base =
-        s"""
-           |[$defType] ${definition.name.value} ===========================
-           |package: ${definition.pkg}
-           |accessibility: ${definition.modifier.accessibility}
-           |fileName: ${definition.fileName.value}""".stripMargin
-
-      val parentsInfo =
-        if (definition.parents.elms.nonEmpty) s"parents: ${definition.parents.elms.mkString(", ")}"
-        else ""
-
-      val constructorInfo = definition match {
-        case c: ClassDefinitionBlock =>
-          s"constructor:\n  ${c.constructor.args.mkString("\n  ")}"
-        case _ => ""
-      }
-
-      val referenceInfo = if (references.elms.nonEmpty) s"references:\n  ${references.elms.mkString("\n  ")}" else ""
-
-      val scaladocInfo = scaladoc match {
-        case Some(doc) => s"description: ${doc.content.replace("\n", " ")}"
-        case None      => ""
-      }
-
-      Seq(base, parentsInfo, constructorInfo, referenceInfo, scaladocInfo).filter(_.nonEmpty).mkString("\n")
-    }
-  }
+      scaladoc: Option[ScaladocBlock])
 }
