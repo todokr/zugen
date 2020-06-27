@@ -1,8 +1,9 @@
 package tool
 
-import java.nio.file.Paths
+import scala.util.chaining._
 
-import tool.Config.{DocumentPath, DocumentsToGenerate, GenDocumentType, TargetPackageName, TargetProjectRootPath}
+import tool.Config.GenDocumentType.{DomainObjectTableGen, DomainRelationDiagramGen}
+import tool.Config.{DocumentPath, DocumentsToGenerate, TargetPackageName, TargetProjectRootPath}
 
 object Main {
 
@@ -10,16 +11,14 @@ object Main {
 
     args.toList match {
       case rootPath :: docPath :: Nil =>
-        val targetProjectRootPath = TargetProjectRootPath(Paths.get(rootPath))
+        val targetProjectRootPath = TargetProjectRootPath(rootPath)
         val targetPackageNames = Seq("example.domain").map(TargetPackageName) // TODO
-        val documentsToGenerate = DocumentsToGenerate(
-          Seq(GenDocumentType.GenDomainObjectTable, GenDocumentType.GenDomainPackageRelationDiagram))
-        val documentPath = DocumentPath(Paths.get(docPath)) // TODO
-        val config =
-          Config(targetProjectRootPath, targetPackageNames, documentsToGenerate, documentPath)
+        val documentsToGenerate = Seq(DomainObjectTableGen, DomainRelationDiagramGen).pipe(DocumentsToGenerate)
+        val documentPath = DocumentPath(docPath) // TODO
+        val config = Config(targetProjectRootPath, targetPackageNames, documentsToGenerate, documentPath)
         Zugen.generateDoc(config)
       case els =>
-        sys.error(s"Expected <rootPath>, obtained $els")
+        sys.error(s"Expected <rootPath> <docPath>, obtained $els")
     }
   }
 }

@@ -1,6 +1,6 @@
 package tool.document
 
-import java.nio.charset.StandardCharsets
+import scala.util.chaining._
 
 import tool.Config
 import tool.document.Document.DomainObjectTableDoc.DomainObjectTableRow
@@ -17,8 +17,6 @@ import tool.models.{DefinitionName, DocumentMaterial, FileName, Package}
 sealed trait Document {
 
   val docName: String
-
-  def serialize: Array[Byte]
 }
 
 object Document {
@@ -29,32 +27,25 @@ object Document {
   final case class DomainObjectTableDoc(rows: Seq[DomainObjectTableRow]) extends Document {
 
     override val docName: String = "domain-object-table"
-
-    override def serialize: Array[Byte] = {
-      val html = views.html.domainobject.DomainObjectTable(this).body
-      html.getBytes(StandardCharsets.UTF_8)
-    }
   }
 
   object DomainObjectTableDoc {
 
-    def of(documentMaterial: DocumentMaterial): DomainObjectTableDoc = {
-      val rows = documentMaterial.elms.map { elm =>
+    def of(documentMaterial: DocumentMaterial): DomainObjectTableDoc =
+      documentMaterial.elms.map { elm =>
         DomainObjectTableRow(
           pkg = elm.definition.pkg,
           name = elm.definition.name,
           scaladoc = elm.scaladoc.map(_.content).getOrElse("-"),
           fileName = elm.definition.fileName
         )
-      }
-      DomainObjectTableDoc(rows)
-    }
+      }.pipe(DomainObjectTableDoc(_))
 
     final case class DomainObjectTableRow(
-        pkg: Package,
-        name: DefinitionName,
-        scaladoc: String,
-        fileName: FileName
+      pkg: Package,
+      name: DefinitionName,
+      scaladoc: String,
+      fileName: FileName
     )
   }
 
@@ -64,11 +55,6 @@ object Document {
   final case class DomainRelationDiagramDoc(digraph: Digraph) extends Document {
 
     override val docName: String = "domain-relation-diagram"
-
-    override def serialize: Array[Byte] = {
-      val html = views.html.domainobject.DomainRelationDiagram(digraph).body
-      html.getBytes(StandardCharsets.UTF_8)
-    }
   }
 
   object DomainRelationDiagramDoc {
@@ -114,12 +100,11 @@ object Document {
           }
         }
 
-      val digraph = Digraph(
+      Digraph(
         label = "Domain model relations",
         subGraphs = subGraphs,
         edges = edges
-      )
-      DomainRelationDiagramDoc(digraph)
+      ).pipe(DomainRelationDiagramDoc(_))
     }
 
     case class Digraph(label: String, subGraphs: Seq[SubGraph], edges: Seq[Edge])

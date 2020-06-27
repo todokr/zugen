@@ -1,7 +1,6 @@
 package tool.models
 
-import tool.models.Modifiers.ModifierElement
-import tool.models.Modifiers.ModifierElement.AccessibilityModifierElement
+import tool.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
 
 /**
   * クラスやトレイトの修飾子
@@ -9,7 +8,7 @@ import tool.models.Modifiers.ModifierElement.AccessibilityModifierElement
 case class Modifiers(elems: Seq[ModifierElement]) {
 
   /**
-    * 可視性に関する修飾子を取得する
+    * アクセス性に関する修飾子を取得する
     */
   def accessibility: String =
     elems
@@ -25,18 +24,16 @@ object Modifiers {
     case object Sealed extends ModifierElement
     case object Final extends ModifierElement
     case object Case extends ModifierElement
+  }
 
-    sealed trait AccessibilityModifierElement extends ModifierElement
+  /**
+    * アクセス性の修飾子
+    */
+  sealed trait AccessibilityModifierElement extends ModifierElement
+  object AccessibilityModifierElement {
     case object Private extends AccessibilityModifierElement
     case object Protected extends AccessibilityModifierElement
-
-    case class PackagePrivate(packageName: String) extends AccessibilityModifierElement {
-
-      override def toString: String = s"Private[${packageName}]"
-    }
-
-    case class PackageProtected(packageName: String) extends AccessibilityModifierElement {
-      override def toString: String = s"Protected[${packageName}]"
-    }
+    case class PackagePrivate(packageName: String) extends AccessibilityModifierElement
+    case class PackageProtected(packageName: String) extends AccessibilityModifierElement
   }
 }

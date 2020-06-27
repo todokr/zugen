@@ -3,6 +3,7 @@ package tool
 import scala.meta._
 import scala.meta.contrib.{DocToken, ScaladocParser}
 import scala.meta.internal.semanticdb.TextDocument
+import scala.util.chaining._
 
 import tool.models.{FileName, Scaladocs}
 import tool.models.Scaladocs.ScaladocBlock
@@ -10,12 +11,12 @@ import tool.models.Scaladocs.ScaladocBlock
 object ScaladocExtractor {
 
   /**
-    * コードからScaladoc形式のコメントブロックを抜き出す。
+    * コードからScaladoc形式のコメントブロックを抜き出す
     */
-  def extractScaladocs(docs: Seq[TextDocument]): Scaladocs = {
-    val blocks = docs.flatMap { doc =>
+  def extractScaladocs(docs: Seq[TextDocument]): Scaladocs =
+    docs.flatMap { doc =>
       val tokens =
-        doc.text.tokenize.getOrElse(throw new Exception("failed to tokenize"))
+        doc.text.tokenize.getOrElse(throw new Exception("failed to tokenize code"))
       val fileName = FileName(doc.uri)
       val comments = tokens.collect { case c: Token.Comment => c }
       comments.flatMap { comment =>
@@ -32,7 +33,6 @@ object ScaladocExtractor {
               )
           }
       }
-    }
-    models.Scaladocs(blocks)
-  }
+    }.pipe(Scaladocs(_))
+
 }

@@ -3,6 +3,7 @@ package tool
 import scala.meta._
 import scala.meta.internal.semanticdb.SymbolOccurrence.Role
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
+import scala.util.chaining._
 
 import tool.models.Constructor.{Arg, ArgName}
 import tool.models.Definitions.DefinitionBlock.{ClassDefinitionBlock, ObjectDefinitionBlock, TraitDefinitionBlock}
@@ -14,11 +15,10 @@ object DefinitionExtractor {
   import Ops._
 
   /**
-    * コードからクラスやトレイトなどの定義ブロックを抜き出す。
+    * コードからクラスやトレイトなどの定義ブロックを抜き出す
     */
-  def extractDefinitions(docs: Seq[TextDocument]): Definitions = {
-
-    val blocks = docs.flatMap { doc =>
+  def extractDefinitions(docs: Seq[TextDocument]): Definitions =
+    docs.flatMap { doc =>
       val packages = doc.text.parse[Source].get.collect { case p: Pkg => p }
       val fileName = FileName(doc.uri)
 
@@ -75,13 +75,10 @@ object DefinitionExtractor {
             )
         }
       }
-    }
+    }.pipe(Definitions(_))
 
-    Definitions(blocks)
-  }
-
-  private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredFQCN]): Parents = {
-    val parents = inits.map { i =>
+  private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredFQCN]): Parents =
+    inits.map { i =>
       val start = i.pos.startLine
       val end = i.pos.endLine
       val typeName = i.tpe.toString
@@ -90,15 +87,15 @@ object DefinitionExtractor {
         .getOrElse(throw new Exception(s"FQCN for parent not found: $typeName"))
       val tpe = Parent.Tpe(typeName, resolvedFQCN.pkg)
       Parent(tpe)
-    }
-    Parents(parents)
-  }
+    }.pipe(Parents(_))
 
-  private def resolveConstructor(params: Seq[Term.Param], referredFQCNs: Seq[ReferredFQCN]): Constructor = {
-    val args = params.map { param =>
+  private def resolveConstructor(params: Seq[Term.Param], referredFQCNs: Seq[ReferredFQCN]): Constructor =
+    params.map { param =>
       val start = param.pos.startLine
       val end = param.pos.endLine
-      val typeName = param.decltpe.map(_.toString).getOrElse(throw new Exception(s"type not found: ${param.name}"))
+      val typeName = param.decltpe
+        .map(_.toString)
+        .getOrElse(throw new Exception(s"type name not found: ${param.name}"))
       val resolvedFQCN = referredFQCNs
         .find(r => r.startLine == start && r.endLine == end && r.typeName == typeName)
         .getOrElse(throw new Exception(s"FQCN for constructor not found: $typeName"))
@@ -106,9 +103,7 @@ object DefinitionExtractor {
         ArgName(param.name.toString),
         Constructor.Tpe(typeName, resolvedFQCN.pkg)
       )
-    }
-    Constructor(args)
-  }
+    }.pipe(Constructor(_))
 
   /**
     * SemanticDBから取得した参照先
@@ -116,7 +111,7 @@ object DefinitionExtractor {
   case class ReferredFQCN(startLine: Int, endLine: Int, fqcn: String) {
 
     val typeName: String = fqcn.split("\\.").last
-    val pkg: Package = Package(fqcn.split("\\.").init.map(PackageElement))
+    val pkg: Package = Package(fqcn.split("\\.").toIndexedSeq.init.map(PackageElement))
   }
 
   private object Ops {
@@ -124,22 +119,21 @@ object DefinitionExtractor {
 
     implicit class RichMods(mods: Seq[Mod]) {
 
-      def toModifier: Modifiers = {
-        val modElms = mods.map(toModElm).collect { case Some(mod) => mod }
-        Modifiers(modElms)
-      }
+      def toModifier: Modifiers =
+        mods.map(toModElm).collect { case Some(mod) => mod }.pipe(Modifiers(_))
     }
 
-    private def toModElm(mod: Mod): Option[ModifierElement] = mod match {
-      case _: Mod.Case                     => Some(ModifierElement.Case)
-      case _: Mod.Sealed                   => Some(ModifierElement.Sealed)
-      case _: Mod.Final                    => Some(ModifierElement.Final)
-      case Mod.Private(Name.Anonymous())   => Some(ModifierElement.Private)
-      case Mod.Protected(Name.Anonymous()) => Some(ModifierElement.Protected)
-      case Mod.Private(ref)                => Some(ModifierElement.PackagePrivate(ref.toString))
-      case Mod.Protected(ref)              => Some(ModifierElement.PackageProtected(ref.toString))
-      case _                               => None
-    }
+    private def toModElm(mod: Mod): Option[ModifierElement] =
+      mod match {
+        case _: Mod.Case                     => Some(ModifierElement.Case)
+        case _: Mod.Sealed                   => Some(ModifierElement.Sealed)
+        case _: Mod.Final                    => Some(ModifierElement.Final)
+        case Mod.Private(Name.Anonymous())   => Some(AccessibilityModifierElement.Private)
+        case Mod.Protected(Name.Anonymous()) => Some(AccessibilityModifierElement.Protected)
+        case Mod.Private(ref)                => Some(AccessibilityModifierElement.PackagePrivate(ref.toString))
+        case Mod.Protected(ref)              => Some(AccessibilityModifierElement.PackageProtected(ref.toString))
+        case _                               => None
+      }
 
     implicit class RichSymbolOccurrence(occurrence: SymbolOccurrence) {
 
@@ -149,8 +143,9 @@ object DefinitionExtractor {
       def isClassOrTraitReference: Boolean =
         occurrence.role == Role.REFERENCE &&
           occurrence.symbol.endsWith("#") // See: https://scalameta.org/docs/semanticdb/specification.html#symbol-1
+
       /**
-        * SymbolからDescriptorを取り除いたFQDN
+        * SymbolからDescriptorを取り除いたFQCN
         */
       def fqcn: String = occurrence.symbol.init
     }

@@ -61,7 +61,7 @@ digraph domain_relation_diagram {
   @for(edge <- digraph.edges) {
     @edge match {
       case DomainInternalEdge(from, to, arrowHead) => { @from -> @to [arrowhead = @arrowHead] }
-      case DomainExternalEdge(from, toLabel, toPkg, arrowHead) => { @from -> "@toLabel" [ color = red, arrowhead = @arrowHead] }
+      case DomainExternalEdge(from, toLabel, _, arrowHead) => { @from -> "@toLabel" [ color = red, arrowhead = @arrowHead] }
     }
   }
 }

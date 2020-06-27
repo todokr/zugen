@@ -1,9 +1,9 @@
-@import views.html.main
+@import play.twirl.api.Html
 @import views.txt.domainobject.ObjectRefs
-@import tool.document.Document.DomainRelationDiagramDoc.Digraph
+@import tool.document.Document.DomainRelationDiagramDoc
 
-@(digraph: Digraph)
-@main("Object references") {
+@(doc: DomainRelationDiagramDoc)
+@views.html.main("Object references") {
   <div id="graph" style="text-align: center;"></div>
 } {
   <script src="http://d3js.org/d3.v4.min.js"></script>
@@ -12,6 +12,6 @@
   <script>
     d3.select("#graph").graphviz()
       .fade(false)
-      .renderDot(`@{Html(ObjectRefs(digraph).toString)}`);
+      .renderDot(`@{Html(ObjectRefs(doc.digraph).toString)}`);
   </script>
 }
