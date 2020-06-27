@@ -1,6 +1,21 @@
-inThisBuild(List(scalaVersion := "2.13.2"))
+lazy val plugin = (project in file("plugin"))
+  .settings(
+    scalaVersion := "2.13.2",
+    scalacOptions ++= Seq(
+      "-feature",
+      "-deprecation",
+      "-unchecked",
+      "-Xlint",
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-unused",
+      "-language:existentials",
+      "-language:higherKinds",
+      "-language:implicitConversions"
+    )
+  ).dependsOn(core)
 
-lazy val cli = project
+lazy val core = (project in file("core"))
   .settings(
     scalaVersion := "2.13.2",
     libraryDependencies ++= Seq(
@@ -24,18 +39,19 @@ lazy val cli = project
   )
   .enablePlugins(SbtTwirl)
 
-val docPath = file("example/zugen-docs")
+val docDir = file("example/zugen-docs")
 commands ++= Seq(
   Command.command("runAll") { s =>
-    val targetRootPath = baseDirectory.in(example, Compile).value
+    val classesDir = classDirectory.in(example, Compile).value
+    val targetPackages = "example.domain"
     "example/compile" ::
-      s"cli/run $targetRootPath $docPath" ::
+      s"core/runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
       "copyAssets" ::
       s
   },
   Command.command("copyAssets") { s =>
-    val fromDirectory = resourceDirectory.in(cli, Compile).value / "assets"
-    val toDirectory = docPath / "assets"
+    val fromDirectory = resourceDirectory.in(core, Compile).value / "assets"
+    val toDirectory = docDir / "assets"
     IO.createDirectory(toDirectory)
     IO.copyDirectory(
       fromDirectory,
@@ -45,8 +61,9 @@ commands ++= Seq(
   }
 )
 
-lazy val example = project
+lazy val example = (project in file("example"))
   .settings(
+    scalaVersion := "2.13.2",
     addCompilerPlugin(
       "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full
     ),
