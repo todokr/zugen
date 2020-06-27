@@ -10,9 +10,8 @@ object Zugen {
     * 各ドキュメントを生成し、生成したドキュメントのパスを表示する
     */
   def generateDoc(config: Config): Unit = {
-    implicit val c: Config = config
     val documentWriter: DocumentWriter = HtmlDocumentWriter
-    val textDocs = TextDocLoader.load(config.targetProjectRootPath)
+    val textDocs = TextDocLoader.load(config.classesPath)
     val definitions = DefinitionExtractor.extractDefinitions(textDocs)
     val scaladocs = ScaladocExtractor.extractScaladocs(textDocs)
     val documentMaterial = definitions.mergeWithScaladoc(scaladocs)

@@ -4,7 +4,9 @@ lazy val cli = project
   .settings(
     scalaVersion := "2.13.2",
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "scalameta" % "4.3.17"
+      "org.scalameta" %% "scalameta" % "4.3.17",
+      "org.scalatest" %% "scalatest" % "3.2.0" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.14.1" % Test
     ),
     scalacOptions ++= Seq(
       "-feature",
@@ -18,14 +20,14 @@ lazy val cli = project
       "-language:higherKinds",
       "-language:implicitConversions"
     ),
-    TwirlKeys.templateImports += "tool._"
+    TwirlKeys.templateImports := Seq.empty
   )
   .enablePlugins(SbtTwirl)
 
 val docPath = file("example/zugen-docs")
 commands ++= Seq(
   Command.command("runAll") { s =>
-    val targetRootPath = classDirectory.in(example, Compile).value
+    val targetRootPath = baseDirectory.in(example, Compile).value
     "example/compile" ::
       s"cli/run $targetRootPath $docPath" ::
       "copyAssets" ::

@@ -1,20 +1,22 @@
 package tool
 
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
 import scala.jdk.CollectionConverters._
 import scala.meta.internal.semanticdb
 import scala.meta.internal.semanticdb.TextDocument
 
-import tool.Config.TargetProjectRootPath
+import tool.Config.ClassesPath
 
 object TextDocLoader {
 
   /**
     * SemanticDBからTextDocumentをロードする
     */
-  def load(rootPath: TargetProjectRootPath): Seq[TextDocument] = {
-    val semanticdbRoot = rootPath.value.resolve("META-INF").resolve("semanticdb")
+  def load(classesPath: ClassesPath): Seq[TextDocument] = {
+    val semanticdbRoot = classesPath.value.resolve("META-INF/semanticdb")
+    if (!Files.exists(semanticdbRoot)) throw new SemanticdbDirectoryNotExistException(semanticdbRoot)
+
     val semanticdbFiles =
       Files.walk(semanticdbRoot)
         .iterator()
@@ -26,4 +28,7 @@ object TextDocLoader {
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
   }
+
+  class SemanticdbDirectoryNotExistException(semanticdbRoot: Path)
+      extends Exception(s"SemanticDB root: $semanticdbRoot")
 }

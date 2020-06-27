@@ -23,5 +23,5 @@ object Package extends (String => Package) {
   }
 
   def apply(packageStr: String): Package =
-    packageStr.split('.').map(Package.PackageElement).pipe(Package(_))
+    packageStr.split('.').toIndexedSeq.map(Package.PackageElement).pipe(Package(_))
 }

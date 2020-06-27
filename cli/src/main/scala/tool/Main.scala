@@ -3,7 +3,7 @@ package tool
 import scala.util.chaining._
 
 import tool.Config.GenDocumentType.{DomainObjectTableGen, DomainRelationDiagramGen}
-import tool.Config.{DocumentPath, DocumentsToGenerate, TargetPackageName, TargetProjectRootPath}
+import tool.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, TargetPackageName}
 
 object Main {
 
@@ -11,7 +11,7 @@ object Main {
 
     args.toList match {
       case rootPath :: docPath :: Nil =>
-        val targetProjectRootPath = TargetProjectRootPath(rootPath)
+        val targetProjectRootPath = ClassesPath(rootPath)
         val targetPackageNames = Seq("example.domain").map(TargetPackageName) // TODO
         val documentsToGenerate = Seq(DomainObjectTableGen, DomainRelationDiagramGen).pipe(DocumentsToGenerate)
         val documentPath = DocumentPath(docPath) // TODO

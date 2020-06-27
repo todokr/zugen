@@ -2,10 +2,10 @@ package tool
 
 import java.nio.file.{Files, Path, Paths}
 
-import tool.Config.{DocumentPath, DocumentsToGenerate, TargetPackageName, TargetProjectRootPath}
+import tool.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, TargetPackageName}
 
 final case class Config(
-  targetProjectRootPath: TargetProjectRootPath, // ドキュメント生成対象プロジェクトのルートパス
+  classesPath: ClassesPath, // ドキュメント生成対象プロジェクトのクラスファイルが格納されたディレクトリへのパス
   domainPackages: Seq[TargetPackageName], // ドキュメント生成対象のパッケージ名
   documentsToGenerate: DocumentsToGenerate, // 生成するドキュメント種別
   documentPath: DocumentPath // 生成したドキュメントを配置するパス
@@ -13,9 +13,9 @@ final case class Config(
 
 object Config {
 
-  final case class TargetProjectRootPath(value: Path) extends AnyVal
-  object TargetProjectRootPath {
-    def apply(value: String): TargetProjectRootPath = TargetProjectRootPath(Paths.get(value))
+  final case class ClassesPath(value: Path) extends AnyVal
+  object ClassesPath {
+    def apply(value: String): ClassesPath = ClassesPath(Paths.get(value))
   }
   final case class TargetPackageName(value: String) extends AnyVal
   final case class DocumentsToGenerate(genDocTypes: Seq[GenDocumentType])

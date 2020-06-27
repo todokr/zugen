@@ -12,7 +12,11 @@ case class Scaladocs(blocks: Seq[ScaladocBlock]) {
     * 渡された定義部に紐づくScaladocを取得する
     */
   def findDocForDefinition(definition: DefinitionBlock): Option[ScaladocBlock] =
-    blocks.find(_.endLine == definition.startLine - 1) // 定義部の開始行の直前で終わるScaladocを、定義部に対するScaladocとみなす
+    blocks.find { block =>
+      // 同じファイルに記述された、定義部の開始行の直前で終わるScaladocを、定義部に対するScaladocとみなす
+      block.fileName == definition.fileName &&
+      block.endLine == definition.startLine - 1
+    }
 }
 
 object Scaladocs {
