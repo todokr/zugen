@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Object references</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+<section class="content">
+  <div id="graph" style="text-align: center;"></div>
+</section>
+
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script src="http://unpkg.com/viz.js@1.8.1/viz.js" type="javascript/worker"></script>
+  <script src="http://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>
+  <script>
+    d3.select("#graph").graphviz()
+      .fade(false)
+      .renderDot(`digraph domain_relation_diagram {
+  graph [
+    charset = "UTF-8";
+    label = "Domain model relations",
+    fontname = "Migu 1M",
+    labelloc = "t",
+    labeljust = "c",
+    bgcolor = "#343434",
+    fontcolor = white,
+    fontsize = 18,
+    style = "filled",
+    rankdir = TB,
+    margin = 0.2,
+    nodesep = 0.5,
+    ranksep = 0.8,
+    compound = true,
+    layout = dot,
+    pad = 0.1
+  ];
+
+  node [
+    colorscheme = rdylgn11,
+    fontname = "Migu 1M",
+    color = 7,
+    fontsize = 12,
+    fontcolor = 6,
+    fillcolor = 11,
+    margin = 0.1,
+    style = "solid,filled"
+  ];
+
+  edge [
+    style = solid,
+    fontsize = 10,
+    fontcolor = white,
+    fontname = "Migu 1M",
+    color = white,
+    labelfloat = false
+  ];
+
+  
+    subgraph cluster_example_domain_order {
+      label = "example.domain.order";
+      style = "";
+      color = white;
+      fontname = "Migu 1M";
+      fontsize = 12;
+      margin = 1;
+      pad = 1;
+
+      
+        example_domain_order_Order [label = "Order
+注文"]
+      
+        example_domain_order_OrderId [label = "OrderId
+注文ID"]
+      
+    }
+  
+    subgraph cluster_example_domain_product {
+      label = "example.domain.product";
+      style = "";
+      color = white;
+      fontname = "Migu 1M";
+      fontsize = 12;
+      margin = 1;
+      pad = 1;
+
+      
+        example_domain_product_Product [label = "Product
+商品"]
+      
+        example_domain_product_ProductId [label = "ProductId
+商品ID"]
+      
+        example_domain_product_ProductName [label = "ProductName
+商品名"]
+      
+        example_domain_product_ProductCategory [label = "ProductCategory
+商品カテゴリ"]
+      
+        example_domain_product_Food [label = "Food
+食品"]
+      
+        example_domain_product_Furniture [label = "Furniture
+家具"]
+      
+        example_domain_product_ElectricAppliance [label = "ElectricAppliance
+電化製品"]
+      
+    }
+  
+    subgraph cluster_example_domain_shipping {
+      label = "example.domain.shipping";
+      style = "";
+      color = white;
+      fontname = "Migu 1M";
+      fontsize = 12;
+      margin = 1;
+      pad = 1;
+
+      
+        example_domain_shipping_Shipping [label = "Shipping
+配送"]
+      
+        example_domain_shipping_ShippingId [label = "ShippingId
+配送ID"]
+      
+        example_domain_shipping_ShippingAddress [label = "ShippingAddress
+配送先アドレス"]
+      
+    }
+  
+
+  
+     example_domain_product_Product -> example_domain_product_ProductId [arrowhead = odiamond] 
+  
+     example_domain_product_Product -> example_domain_product_ProductName [arrowhead = odiamond] 
+  
+     example_domain_product_Product -> example_domain_product_ProductCategory [arrowhead = odiamond] 
+  
+     example_domain_product_Food -> example_domain_product_ProductCategory [arrowhead = normal] 
+  
+     example_domain_product_Furniture -> example_domain_product_ProductCategory [arrowhead = normal] 
+  
+     example_domain_product_ElectricAppliance -> example_domain_product_ProductCategory [arrowhead = normal] 
+  
+     example_domain_shipping_Shipping -> example_domain_shipping_ShippingId [arrowhead = odiamond] 
+  
+     example_domain_shipping_Shipping -> example_domain_order_Order [arrowhead = odiamond] 
+  
+     example_domain_shipping_Shipping -> example_domain_shipping_ShippingAddress [arrowhead = odiamond] 
+  
+     example_domain_shipping_Shipping -> "example.badreference
+SomeClass" [ color = red, arrowhead = odiamond] 
+  
+     example_domain_order_Order -> example_domain_order_OrderId [arrowhead = odiamond] 
+  
+     example_domain_order_Order -> example_domain_product_ProductId [arrowhead = odiamond] 
+  
+}
+`);
+  </script>
+
+</body>
+</html>
+

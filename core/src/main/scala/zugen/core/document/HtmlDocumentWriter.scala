@@ -17,7 +17,7 @@ object HtmlDocumentWriter extends DocumentWriter {
   override def write(material: DocumentMaterial, config: Config): Seq[GeneratedDocumentPath] = {
     val htmlWithName = config.documentsToGenerate.genDocTypes.map {
       case GenDomainObjectTable =>
-        val doc = DomainObjectTableDoc.of(material)
+        val doc = DomainObjectTableDoc.of(material, config)
         doc.docName -> views.html.domainobject.DomainObjectTable(doc).body
       case GenDomainRelationDiagram =>
         val doc = DomainRelationDiagramDoc.of(material, config)

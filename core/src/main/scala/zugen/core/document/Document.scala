@@ -31,15 +31,18 @@ object Document {
 
   object DomainObjectTableDoc {
 
-    def of(documentMaterial: DocumentMaterial): DomainObjectTableDoc =
-      documentMaterial.elms.map { elm =>
-        DomainObjectTableRow(
-          pkg = elm.definition.pkg,
-          name = elm.definition.name,
-          scaladoc = elm.scaladoc.map(_.content).getOrElse("-"),
-          fileName = elm.definition.fileName
-        )
+    def of(documentMaterial: DocumentMaterial, config: Config): DomainObjectTableDoc = {
+      val domainPackages = config.domainPackages.map(n => Package(n.value))
+      documentMaterial.elms.collect {
+        case elm if elm.definition.isInAnyPackage(domainPackages) =>
+          DomainObjectTableRow(
+            pkg = elm.definition.pkg,
+            name = elm.definition.name,
+            scaladoc = elm.scaladoc.map(_.content).getOrElse(""),
+            fileName = elm.definition.fileName
+          )
       }.pipe(DomainObjectTableDoc(_))
+    }
 
     final case class DomainObjectTableRow(
       pkg: Package,
@@ -66,7 +69,7 @@ object Document {
       val domainPackages = config.domainPackages.map(n => Package(n.value))
 
       val subGraphs = documentMaterial.elms
-        .filter(elm => elm.definition.isInAnyPackage(domainPackages)) // サブグラフとノードは、指定されたパッケージに所属する定義ブロックのみに絞り込む
+        .filter(elm => elm.definition.isInAnyPackage(domainPackages)) // サブグラフとノードは、ドメインのパッケージに所属する定義ブロックのみに絞り込む
         .groupBy(_.definition.pkg)
         .map {
           case (pkg, materials) =>

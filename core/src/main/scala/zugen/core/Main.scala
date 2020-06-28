@@ -21,7 +21,7 @@ object Main {
         val config = Config(classesPath, domainPackageNames, documentsToGenerate, documentPath)
         Zugen.generateDoc(config)
       case els =>
-        sys.error(s"Expected <projectRootPath> <classesDir> <docsDir> <domainPkg[,domainPkg]*>, obtained $els")
+        sys.error(s"Expected <classesDir> <docsDir> <domainPkg[,domainPkg]*>, obtained $els")
     }
   }
 }

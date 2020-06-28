@@ -49,10 +49,10 @@ lazy val core = (project in file("core"))
   )
   .enablePlugins(SbtTwirl)
 
-val docDir = file("example/zugen-docs")
+val docDir = file("zugen-docs")
 commands ++= Seq(
   Command.command("runAll") { s =>
-    val classesDir = classDirectory.in(example, Compile).value
+    val classesDir = file("plugin/src/sbt-test/example/target/scala-2.13/classes")
     val targetPackages = "example.domain"
     "example/compile" ::
       s"core/runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
