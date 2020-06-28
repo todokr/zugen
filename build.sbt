@@ -1,6 +1,12 @@
 lazy val plugin = (project in file("plugin"))
+  .enablePlugins(SbtPlugin)
   .settings(
-    scalaVersion := "2.13.2",
+    organization := "io.github.todokr",
+    organizationName := "todokr",
+    name := "sbt-zugen",
+    version := "0.0.1-SNAPSHOT",
+    scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+    scriptedBufferLog := false,
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
@@ -17,9 +23,13 @@ lazy val plugin = (project in file("plugin"))
 
 lazy val core = (project in file("core"))
   .settings(
-    scalaVersion := "2.13.2",
+    scalaVersion := "2.12.10",
+    organization := "io.github.todokr",
+    organizationName := "todokr",
+    name := "zugen-core",
     libraryDependencies ++= Seq(
       "org.scalameta" %% "scalameta" % "4.3.17",
+      "com.github.bigwheel" %% "util-backports" % "2.1",
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.1" % Test
     ),
@@ -67,5 +77,5 @@ lazy val example = (project in file("example"))
     addCompilerPlugin(
       "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full
     ),
-    scalacOptions += "-Yrangepos"
+    scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
   )

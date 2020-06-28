@@ -1,8 +1,8 @@
 package zugen.core
 
+import scala.meta._
 import scala.meta.internal.semanticdb.SymbolOccurrence.Role
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
-import scala.meta._
 import scala.util.chaining._
 
 import zugen.core.models.Constructor.{Arg, ArgName}
@@ -97,8 +97,9 @@ object DefinitionExtractor {
         .map(_.toString)
         .getOrElse(throw new Exception(s"type name not found: ${param.name}"))
       val resolvedFQCN = referredFQCNs
-        .find(r => r.startLine == start && r.endLine == end && r.typeName == typeName)
-        .getOrElse(throw new Exception(s"FQCN for constructor not found: $typeName"))
+        .find(_.matches(start, end, typeName))
+        .getOrElse(throw new Exception(
+          s"FQCN for constructor not found: typeName = $typeName, start = $start, end = $end"))
       Arg(
         ArgName(param.name.toString),
         Constructor.Tpe(typeName, resolvedFQCN.pkg)
@@ -110,8 +111,12 @@ object DefinitionExtractor {
     */
   case class ReferredFQCN(startLine: Int, endLine: Int, fqcn: String) {
 
-    val typeName: String = fqcn.split("\\.").last
-    val pkg: Package = Package(fqcn.split("\\.").toIndexedSeq.init.map(PackageElement))
+    val typeName: String = fqcn.split("/").last
+    val pkg: Package = Package(fqcn.split("/").toIndexedSeq.init.map(PackageElement))
+
+    def matches(startLine: Int, endLine: Int, typeName: String): Boolean =
+      this.startLine == startLine && this.endLine == endLine &&
+        (this.typeName == typeName || this.typeName == s"Predef.$typeName")
   }
 
   private object Ops {

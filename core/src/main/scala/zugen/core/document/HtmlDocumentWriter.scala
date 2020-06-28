@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import zugen.core.Config
-import zugen.core.Config.GenDocumentType.{DomainObjectTableGen, DomainRelationDiagramGen}
+import zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
 import zugen.core.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
 import zugen.core.document.DocumentWriter.GeneratedDocumentPath
 import zugen.core.models.DocumentMaterial
@@ -15,12 +15,11 @@ import zugen.core.models.DocumentMaterial
 object HtmlDocumentWriter extends DocumentWriter {
 
   override def write(material: DocumentMaterial, config: Config): Seq[GeneratedDocumentPath] = {
-
     val htmlWithName = config.documentsToGenerate.genDocTypes.map {
-      case DomainObjectTableGen =>
+      case GenDomainObjectTable =>
         val doc = DomainObjectTableDoc.of(material)
         doc.docName -> views.html.domainobject.DomainObjectTable(doc).body
-      case DomainRelationDiagramGen =>
+      case GenDomainRelationDiagram =>
         val doc = DomainRelationDiagramDoc.of(material, config)
         doc.docName -> views.html.domainobject.DomainRelationDiagram(doc).body
     }

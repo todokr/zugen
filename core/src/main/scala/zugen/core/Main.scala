@@ -1,8 +1,9 @@
 package zugen.core
 
-import zugen.core.Config.GenDocumentType.{DomainObjectTableGen, DomainRelationDiagramGen}
-import zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, TargetPackageName}
 import scala.util.chaining._
+
+import zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName}
+import zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
 
 /**
   * 開発時の動作確認用エントリーポイント
@@ -12,15 +13,15 @@ object Main {
   def main(args: Array[String]): Unit = {
 
     args.toList match {
-      case classesDir :: docsDir :: targetPkgs :: Nil =>
+      case classesDir :: docsDir :: domainPkgs :: Nil =>
         val classesPath = ClassesPath(classesDir)
-        val targetPackageNames = targetPkgs.split(",").toIndexedSeq.map(TargetPackageName)
-        val documentsToGenerate = Seq(DomainObjectTableGen, DomainRelationDiagramGen).pipe(DocumentsToGenerate)
+        val domainPackageNames = domainPkgs.split(",").toIndexedSeq.map(DomainPackageName)
+        val documentsToGenerate = Seq(GenDomainObjectTable, GenDomainRelationDiagram).pipe(DocumentsToGenerate)
         val documentPath = DocumentPath(docsDir)
-        val config = Config(classesPath, targetPackageNames, documentsToGenerate, documentPath)
+        val config = Config(classesPath, domainPackageNames, documentsToGenerate, documentPath)
         Zugen.generateDoc(config)
       case els =>
-        sys.error(s"Expected <classesDir> <docsDir> <targetPkg[,targetPkg]*>, obtained $els")
+        sys.error(s"Expected <projectRootPath> <classesDir> <docsDir> <domainPkg[,domainPkg]*>, obtained $els")
     }
   }
 }
