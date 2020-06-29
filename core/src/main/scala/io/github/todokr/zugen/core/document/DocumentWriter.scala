@@ -1,10 +1,10 @@
-package zugen.core.document
+package io.github.todokr.zugen.core.document
 
 import java.nio.file.Path
 
-import zugen.core.Config
-import zugen.core.document.DocumentWriter.GeneratedDocumentPath
-import zugen.core.models.DocumentMaterial
+import io.github.todokr.zugen.core.Config
+import io.github.todokr.zugen.core.document.DocumentWriter.GeneratedDocumentPath
+import io.github.todokr.zugen.core.models.DocumentMaterial
 
 trait DocumentWriter {
 

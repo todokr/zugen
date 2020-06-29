@@ -1,7 +1,7 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
 import scala.util.chaining._
-import zugen.core.models.Package.PackageElement
+import io.github.todokr.zugen.core.models.Package.PackageElement
 
 /**
   * パッケージ

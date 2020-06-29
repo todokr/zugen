@@ -1,12 +1,12 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
 import scala.util.chaining._
 
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import zugen.core.models.Definitions.DefinitionBlock.ClassDefinitionBlock
-import zugen.core.models.Scaladocs.ScaladocBlock
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock.ClassDefinitionBlock
+import io.github.todokr.zugen.core.models.Scaladocs.ScaladocBlock
 
 class DefinitionsTest extends AnyWordSpec with Matchers with OptionValues {
 

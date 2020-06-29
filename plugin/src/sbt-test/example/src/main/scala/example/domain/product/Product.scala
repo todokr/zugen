@@ -1,14 +1,11 @@
 package example.domain.product
 
+import example.domain.Id
+
 /**
   * 商品
   */
-case class Product(id: ProductId, name: ProductName, category: ProductCategory)
-
-/**
-  * 商品ID
-  */
-case class ProductId(value: String) extends AnyVal
+case class Product(id: Id[Product], name: ProductName, category: ProductCategory)
 
 /**
   * 商品名

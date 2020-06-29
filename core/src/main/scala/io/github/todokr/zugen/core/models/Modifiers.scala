@@ -1,6 +1,6 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
+import io.github.todokr.zugen.core.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
 
 /**
   * クラスやトレイトの修飾子

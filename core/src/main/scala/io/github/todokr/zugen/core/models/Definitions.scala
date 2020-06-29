@@ -1,12 +1,12 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
 import scala.util.chaining._
 
-import zugen.core.models.Definitions._
-import zugen.core.models.DocumentMaterial.DocumentMaterialElement
-import zugen.core.models.Modifiers.ModifierElement
-import zugen.core.models.References.ExternalReference.ExternalInheritance
-import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
+import io.github.todokr.zugen.core.models.Definitions._
+import io.github.todokr.zugen.core.models.DocumentMaterial.DocumentMaterialElement
+import io.github.todokr.zugen.core.models.Modifiers.ModifierElement
+import io.github.todokr.zugen.core.models.References.ExternalReference.ExternalInheritance
+import io.github.todokr.zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
 
 /**
   * classやtraitの定義ブロック

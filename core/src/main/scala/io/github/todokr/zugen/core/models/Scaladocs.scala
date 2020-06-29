@@ -1,7 +1,7 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.Scaladocs.ScaladocBlock
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock
+import io.github.todokr.zugen.core.models.Scaladocs.ScaladocBlock
 
 /**
   * 1ファイル分のscaladocの集合

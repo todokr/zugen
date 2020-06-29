@@ -1,8 +1,8 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
 import java.nio.file.{Files, Path, Paths}
 
-import zugen.core.document.{DocumentWriter, HtmlDocumentWriter}
+import io.github.todokr.zugen.core.document.{DocumentWriter, HtmlDocumentWriter}
 
 object Zugen {
 

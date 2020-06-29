@@ -2,13 +2,14 @@ package example.domain.order
 
 import java.time.OffsetDateTime
 
-import example.domain.product.ProductId
+import example.domain.product.Product
+import example.domain.Id
 
 /**
   * 注文
   * これは二行目
   */
-case class Order(id: OrderId, productId: ProductId, orderedAt: OffsetDateTime)
+case class Order(id: OrderId, productId: Id[Product], orderedAt: OffsetDateTime)
 
 /**
   * 注文ID

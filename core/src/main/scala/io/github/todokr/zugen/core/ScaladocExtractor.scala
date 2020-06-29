@@ -1,12 +1,11 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
+import io.github.todokr.zugen.core.models.Scaladocs.ScaladocBlock
+import io.github.todokr.zugen.core.models.{FileName, Scaladocs}
 import scala.meta.contrib.{DocToken, ScaladocParser}
 import scala.meta.internal.semanticdb.TextDocument
 import scala.meta._
 import scala.util.chaining._
-
-import zugen.core.models.Scaladocs.ScaladocBlock
-import zugen.core.models.{FileName, Scaladocs}
 
 object ScaladocExtractor {
 

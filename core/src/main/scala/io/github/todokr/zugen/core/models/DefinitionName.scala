@@ -1,4 +1,4 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
 /**
   * クラスやトレイトなどの名称

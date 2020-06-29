@@ -1,7 +1,7 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.References.Reference
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock
+import io.github.todokr.zugen.core.models.References.Reference
 
 /**
   * クラスやトレイトが参照する定義

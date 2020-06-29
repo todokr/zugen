@@ -1,6 +1,6 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Constructor.Arg
+import io.github.todokr.zugen.core.models.Constructor.Arg
 
 /**
   * クラスのコンストラクタ
@@ -15,5 +15,5 @@ object Constructor {
   case class ArgName(value: String) extends AnyVal {
     override def toString: String = value
   }
-  case class Tpe(typeName: String, pkg: Package)
+  case class Tpe(typeName: String, typeArgs: Seq[String], pkg: Package)
 }

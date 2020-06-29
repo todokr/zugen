@@ -1,15 +1,15 @@
-package zugen.core.document
+package io.github.todokr.zugen.core.document
 
 import scala.util.chaining._
 
-import zugen.core.Config
-import zugen.core.document.Document.DomainObjectTableDoc.DomainObjectTableRow
-import zugen.core.document.Document.DomainRelationDiagramDoc.Digraph
-import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.References.InternalReference
-import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
-import zugen.core.models.Scaladocs.ScaladocBlock
-import zugen.core.models.{DefinitionName, DocumentMaterial, FileName, Package}
+import io.github.todokr.zugen.core.Config
+import io.github.todokr.zugen.core.document.Document.DomainObjectTableDoc.DomainObjectTableRow
+import io.github.todokr.zugen.core.document.Document.DomainRelationDiagramDoc.Digraph
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock
+import io.github.todokr.zugen.core.models.References.InternalReference
+import io.github.todokr.zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
+import io.github.todokr.zugen.core.models.Scaladocs.ScaladocBlock
+import io.github.todokr.zugen.core.models.{DefinitionName, DocumentMaterial, FileName, Package}
 
 /**
   * 生成されるドキュメントのデータ

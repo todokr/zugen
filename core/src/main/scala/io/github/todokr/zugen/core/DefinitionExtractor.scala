@@ -1,15 +1,15 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
+import io.github.todokr.zugen.core.models._
+import io.github.todokr.zugen.core.models.Constructor._
+import io.github.todokr.zugen.core.models.Parents.Parent
+import io.github.todokr.zugen.core.models.Package.PackageElement
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock._
+import io.github.todokr.zugen.core.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
 import scala.meta._
 import scala.meta.internal.semanticdb.SymbolOccurrence.Role
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
 import scala.util.chaining._
-
-import zugen.core.models.Constructor.{Arg, ArgName}
-import zugen.core.models.Definitions.DefinitionBlock.{ClassDefinitionBlock, ObjectDefinitionBlock, TraitDefinitionBlock}
-import zugen.core.models.Package.PackageElement
-import zugen.core.models.Parents.Parent
-import zugen.core.models.{Constructor, DefinitionName, Definitions, FileName, Modifiers, Package, Parents}
 
 object DefinitionExtractor {
   import Ops._
@@ -21,9 +21,6 @@ object DefinitionExtractor {
     docs.flatMap { doc =>
       val packages = doc.text.parse[Source].get.collect { case p: Pkg => p }
       val fileName = FileName(doc.uri)
-
-      // コード中のシンボルが参照しているクラスやトレイトを解決するため、
-      // 参照先のFully Qualified Class Nameと出現位置を取得する
       val referredFQCNs = doc.occurrences
         .collect {
           case s @ SymbolOccurrence(Some(range), _, _) if s.isClassOrTraitReference =>
@@ -43,7 +40,7 @@ object DefinitionExtractor {
 
             ClassDefinitionBlock(
               name = DefinitionName(c.name.toString),
-              modifier = c.mods.toModifier,
+              modifier = c.mods.map(toModElm).collect { case Some(mod) => mod }.pipe(Modifiers(_)),
               parents = parents,
               pkg = pkg,
               constructor = constructor,
@@ -53,9 +50,10 @@ object DefinitionExtractor {
             )
           case t: Defn.Trait =>
             val parents = resolveParents(t.templ.inits, referredFQCNs)
+
             TraitDefinitionBlock(
               name = DefinitionName(t.name.toString),
-              modifier = t.mods.toModifier,
+              modifier = t.mods.map(toModElm).collect { case Some(mod) => mod }.pipe(Modifiers(_)),
               parents = parents,
               pkg = pkg,
               fileName = fileName,
@@ -66,7 +64,7 @@ object DefinitionExtractor {
             val parents = resolveParents(o.templ.inits, referredFQCNs)
             ObjectDefinitionBlock(
               name = DefinitionName(o.name.toString),
-              modifier = o.mods.toModifier,
+              modifier = o.mods.map(toModElm).collect { case Some(mod) => mod }.pipe(Modifiers(_)),
               parents = parents,
               pkg = pkg,
               fileName = fileName,
@@ -78,33 +76,55 @@ object DefinitionExtractor {
     }.pipe(Definitions(_))
 
   private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredFQCN]): Parents =
-    inits.map { i =>
-      val start = i.pos.startLine
-      val end = i.pos.endLine
-      val typeName = i.tpe.toString
+    inits.map { init =>
+      val (typeName, typeArgs) = init.tpe match {
+        case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
+        case x              => (x.toString, Seq.empty)
+      }
       val resolvedFQCN = referredFQCNs
-        .find(r => r.startLine == start && r.endLine == end && r.typeName == typeName)
-        .getOrElse(throw new Exception(s"FQCN for parent not found: $typeName"))
-      val tpe = Parent.Tpe(typeName, resolvedFQCN.pkg)
+        .find { r =>
+          r.startLine == init.pos.startLine &&
+          r.endLine == init.pos.endLine &&
+          r.typeName == typeName
+        }
+        .getOrElse(throw new Exception(s"FQCN for parent not found: typeName = ${typeName}," +
+          s" start = ${init.pos.startLine}, end = ${init.pos.endLine}"))
+      val tpe = Parent.Tpe(typeName, typeArgs, resolvedFQCN.pkg)
       Parent(tpe)
     }.pipe(Parents(_))
 
-  private def resolveConstructor(params: Seq[Term.Param], referredFQCNs: Seq[ReferredFQCN]): Constructor =
+  private def resolveConstructor(
+    params: Seq[Term.Param],
+    referredFQCNs: Seq[ReferredFQCN]): Constructor =
     params.map { param =>
-      val start = param.pos.startLine
-      val end = param.pos.endLine
-      val typeName = param.decltpe
-        .map(_.toString)
-        .getOrElse(throw new Exception(s"type name not found: ${param.name}"))
+      val tpe = param.decltpe.getOrElse(throw new Exception(s"Declaration type not found for $param"))
+      val (typeName, typeArgs) = tpe match {
+        case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
+        case x              => (x.toString, Seq.empty)
+      }
       val resolvedFQCN = referredFQCNs
-        .find(_.matches(start, end, typeName))
+        .find(_.matches(param.pos.startLine, param.pos.endLine, typeName))
         .getOrElse(throw new Exception(
-          s"FQCN for constructor not found: typeName = $typeName, start = $start, end = $end"))
+          s"FQCN for constructor not found: " +
+            s"typeName = ${typeName}, typeArgs = ${typeArgs.mkString(",")}, " +
+            s"start = ${param.pos.startLine}, end = ${param.pos.endLine}"))
       Arg(
         ArgName(param.name.toString),
-        Constructor.Tpe(typeName, resolvedFQCN.pkg)
+        Constructor.Tpe(typeName, typeArgs, resolvedFQCN.pkg)
       )
     }.pipe(Constructor(_))
+
+  private def toModElm(mod: Mod): Option[ModifierElement] =
+    mod match {
+      case _: Mod.Case                     => Some(ModifierElement.Case)
+      case _: Mod.Sealed                   => Some(ModifierElement.Sealed)
+      case _: Mod.Final                    => Some(ModifierElement.Final)
+      case Mod.Private(Name.Anonymous())   => Some(AccessibilityModifierElement.Private)
+      case Mod.Protected(Name.Anonymous()) => Some(AccessibilityModifierElement.Protected)
+      case Mod.Private(ref)                => Some(AccessibilityModifierElement.PackagePrivate(ref.toString))
+      case Mod.Protected(ref)              => Some(AccessibilityModifierElement.PackageProtected(ref.toString))
+      case _                               => None
+    }
 
   /**
     * SemanticDBから取得した参照先
@@ -114,31 +134,34 @@ object DefinitionExtractor {
     val typeName: String = fqcn.split("/").last
     val pkg: Package = Package(fqcn.split("/").toIndexedSeq.init.map(PackageElement))
 
-    def matches(startLine: Int, endLine: Int, typeName: String): Boolean =
+    def matches(startLine: Int, endLine: Int, typeName: String): Boolean = {
       this.startLine == startLine && this.endLine == endLine &&
-        (this.typeName == typeName || this.typeName == s"Predef.$typeName")
+      (this.typeName == typeName || this.typeName == s"Predef.$typeName") // TODO hack
+    }
   }
 
+  /**
+    * SemanticDBから取得した親クラス・トレイト
+    */
+  case class ExtractedParent(
+    typeName: String,
+    typeArgs: Seq[String],
+    startLine: Int,
+    endLine: Int
+  )
+
+  /**
+    * SemainticDBから取得したコンストラクタ引数
+    */
+  case class ExtractedConstructorArg(
+    name: String,
+    typeName: String,
+    typeArgs: Seq[String],
+    startLine: Int,
+    endLine: Int
+  )
+
   private object Ops {
-    import Modifiers._
-
-    implicit class RichMods(mods: Seq[Mod]) {
-
-      def toModifier: Modifiers =
-        mods.map(toModElm).collect { case Some(mod) => mod }.pipe(Modifiers(_))
-    }
-
-    private def toModElm(mod: Mod): Option[ModifierElement] =
-      mod match {
-        case _: Mod.Case                     => Some(ModifierElement.Case)
-        case _: Mod.Sealed                   => Some(ModifierElement.Sealed)
-        case _: Mod.Final                    => Some(ModifierElement.Final)
-        case Mod.Private(Name.Anonymous())   => Some(AccessibilityModifierElement.Private)
-        case Mod.Protected(Name.Anonymous()) => Some(AccessibilityModifierElement.Protected)
-        case Mod.Private(ref)                => Some(AccessibilityModifierElement.PackagePrivate(ref.toString))
-        case Mod.Protected(ref)              => Some(AccessibilityModifierElement.PackageProtected(ref.toString))
-        case _                               => None
-      }
 
     implicit class RichSymbolOccurrence(occurrence: SymbolOccurrence) {
 

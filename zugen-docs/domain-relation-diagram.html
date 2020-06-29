@@ -87,9 +87,6 @@
         example_domain_product_Product [label = "Product
 商品"]
       
-        example_domain_product_ProductId [label = "ProductId
-商品ID"]
-      
         example_domain_product_ProductName [label = "ProductName
 商品名"]
       
@@ -128,9 +125,23 @@
       
     }
   
+    subgraph cluster_example_domain {
+      label = "example.domain";
+      style = "";
+      color = white;
+      fontname = "Migu 1M";
+      fontsize = 12;
+      margin = 1;
+      pad = 1;
+
+      
+        example_domain_Id [label = "Id"]
+      
+    }
+  
 
   
-     example_domain_product_Product -> example_domain_product_ProductId [arrowhead = odiamond] 
+     example_domain_product_Product -> example_domain_Id [arrowhead = odiamond] 
   
      example_domain_product_Product -> example_domain_product_ProductName [arrowhead = odiamond] 
   
@@ -153,7 +164,7 @@ SomeClass" [ color = red, arrowhead = odiamond]
   
      example_domain_order_Order -> example_domain_order_OrderId [arrowhead = odiamond] 
   
-     example_domain_order_Order -> example_domain_product_ProductId [arrowhead = odiamond] 
+     example_domain_order_Order -> example_domain_Id [arrowhead = odiamond] 
   
 }
 `);

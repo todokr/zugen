@@ -54,7 +54,7 @@ commands ++= Seq(
   Command.command("runAll") { s =>
     val classesDir = file("plugin/src/sbt-test/example/target/scala-2.13/classes")
     val targetPackages = "example.domain"
-    s"core/runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
+    s"core/runMain io.github.todokr.zugen.core.Main $classesDir $docDir $targetPackages" ::
       "copyAssets" ::
       s
   },

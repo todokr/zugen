@@ -2,9 +2,9 @@ package zugen.plugin
 
 import sbt.{Def, _}
 import sbt.Keys._
-import zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
-import zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName, GenDocumentType}
-import zugen.core.{Config, Zugen}
+import io.github.todokr.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
+import io.github.todokr.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName, GenDocumentType}
+import io.github.todokr.core.{Config, Zugen}
 
 object SbtZugen extends AutoPlugin {
 

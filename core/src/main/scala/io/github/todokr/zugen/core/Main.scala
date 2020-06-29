@@ -1,9 +1,9 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
 import scala.util.chaining._
 
-import zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName}
-import zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
+import io.github.todokr.zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName}
+import io.github.todokr.zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
 
 /**
   * 開発時の動作確認用エントリーポイント

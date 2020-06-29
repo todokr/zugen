@@ -1,13 +1,13 @@
-package zugen.core.document
+package io.github.todokr.zugen.core.document
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
-import zugen.core.Config
-import zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
-import zugen.core.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
-import zugen.core.document.DocumentWriter.GeneratedDocumentPath
-import zugen.core.models.DocumentMaterial
+import io.github.todokr.zugen.core.Config
+import io.github.todokr.zugen.core.Config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
+import io.github.todokr.zugen.core.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
+import io.github.todokr.zugen.core.document.DocumentWriter.GeneratedDocumentPath
+import io.github.todokr.zugen.core.models.DocumentMaterial
 
 /**
   * ドキュメントデータをHTMLとして書き出す

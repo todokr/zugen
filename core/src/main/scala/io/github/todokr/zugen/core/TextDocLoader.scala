@@ -1,4 +1,4 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
 import java.nio.file.{Files, Path}
 
@@ -6,7 +6,7 @@ import scala.jdk.CollectionConverters._
 import scala.meta.internal.semanticdb
 import scala.meta.internal.semanticdb.TextDocument
 
-import zugen.core.Config.ClassesPath
+import io.github.todokr.zugen.core.Config.ClassesPath
 
 object TextDocLoader {
 

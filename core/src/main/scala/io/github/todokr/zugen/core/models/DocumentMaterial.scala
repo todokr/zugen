@@ -1,8 +1,8 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.DocumentMaterial.DocumentMaterialElement
-import zugen.core.models.Scaladocs.ScaladocBlock
+import io.github.todokr.zugen.core.models.Definitions.DefinitionBlock
+import io.github.todokr.zugen.core.models.DocumentMaterial.DocumentMaterialElement
+import io.github.todokr.zugen.core.models.Scaladocs.ScaladocBlock
 
 /**
   * 生成されるドキュメントの大本となるデータ構造。クラスやトレイトの定義ブロックやScaladoc, 参照などを含む。

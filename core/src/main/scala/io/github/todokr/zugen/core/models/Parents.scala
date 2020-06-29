@@ -1,6 +1,6 @@
-package zugen.core.models
+package io.github.todokr.zugen.core.models
 
-import zugen.core.models.Parents.Parent
+import io.github.todokr.zugen.core.models.Parents.Parent
 
 /**
   * クラスやトレイトの親
@@ -14,6 +14,6 @@ object Parents {
   }
 
   object Parent {
-    case class Tpe(typeName: String, pkg: Package)
+    case class Tpe(typeName: String, typeArgs: Seq[String], pkg: Package)
   }
 }

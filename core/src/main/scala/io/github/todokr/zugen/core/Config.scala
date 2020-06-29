@@ -1,8 +1,8 @@
-package zugen.core
+package io.github.todokr.zugen.core
 
 import java.nio.file.{Files, Path, Paths}
 
-import zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName}
+import io.github.todokr.zugen.core.Config.{ClassesPath, DocumentPath, DocumentsToGenerate, DomainPackageName}
 
 final case class Config(
   classesPath: ClassesPath, // ドキュメント生成対象プロジェクトのクラスファイルが格納されたディレクトリへのパス

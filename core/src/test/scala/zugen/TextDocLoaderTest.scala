@@ -7,8 +7,8 @@ import scala.util.chaining._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import zugen.Config.ClassesPath
-import zugen.core.TextDocLoader
-import zugen.core.TextDocLoader.SemanticdbDirectoryNotExistException
+import io.github.todokr.zugen.core.TextDocLoader
+import io.github.todokr.zugen.core.TextDocLoader.SemanticdbDirectoryNotExistException
 
 class TextDocLoaderTest extends AnyWordSpec with Matchers {
 
