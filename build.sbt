@@ -54,8 +54,7 @@ commands ++= Seq(
   Command.command("runAll") { s =>
     val classesDir = file("plugin/src/sbt-test/example/target/scala-2.13/classes")
     val targetPackages = "example.domain"
-    "example/compile" ::
-      s"core/runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
+    s"core/runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
       "copyAssets" ::
       s
   },
@@ -70,12 +69,3 @@ commands ++= Seq(
     s
   }
 )
-
-lazy val example = (project in file("example"))
-  .settings(
-    scalaVersion := "2.13.2",
-    addCompilerPlugin(
-      "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full
-    ),
-    scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
-  )
