@@ -1,0 +1,10 @@
+@import java.time.LocalDateTime
+@import zugen.core.document.GeneratedDocument
+
+@(documents: Seq[GeneratedDocument], generatedAt: LocalDateTime)
+<p>generated: @{generatedAt.toString}</p>
+<ul>
+  @for(doc <- documents) {
+    <li>@doc.docName</li>
+  }
+</ul>
