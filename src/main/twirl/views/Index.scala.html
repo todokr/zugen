@@ -2,9 +2,15 @@
 @import zugen.core.document.GeneratedDocument
 
 @(documents: Seq[GeneratedDocument], generatedAt: LocalDateTime)
-<p>generated: @{generatedAt.toString}</p>
-<ul>
-  @for(doc <- documents) {
-    <li>@doc.docName</li>
-  }
-</ul>
+@views.html.Layout("Domain objects", generatedAt) {
+<h1 class="page-title">Zugen Documents</h1>
+<div id="index-page">
+  <nav>
+    <ul>
+      @for(doc <- documents) {
+      <li><a href="@{doc.path}">@{doc.docName}</a></li>
+      }
+    </ul>
+  </nav>
+</div>
+}()

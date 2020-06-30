@@ -6,13 +6,13 @@
 <html>
 <head>
   <title>@title</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.3/build/pure-min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.3/base-context-min.min.css">
   <link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
 <section id="content">@content</section>
 <footer id="footer">
-  <span>Generated at @{generatedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}</span>
+  <span>Generated at @{generatedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}</span>
   <span>powered by zugen</span>
 </footer>
 @js

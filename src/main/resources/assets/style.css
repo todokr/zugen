@@ -1,5 +1,5 @@
 html, body {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
@@ -9,6 +9,12 @@ body {
   margin: 0;
   background: #fafafa;
   position: relative;
+}
+
+ul, li {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0;
 }
 
 #content {
@@ -35,9 +41,21 @@ body {
 
 .page-title {
   margin: 0;
-  padding: 16px 32px;
+  padding: 16px;
   font-size: 16px;
   font-weight: normal
+}
+
+#index-page {
+    padding: 0 16px;
+}
+
+#index-page li {
+    margin-top: 8px;
+}
+
+#domain-object-table {
+    padding: 0 16px;
 }
 
 table {
@@ -46,13 +64,17 @@ table {
 }
 
 th, td {
-    border: 1px #ccc solid;
-    font-size: 12px;
-    padding: 4px 8px;
+    text-align: left;
+    font-size: 14px;
+    padding: 8px;
 }
 
 th {
     font-weight: bold;
+    border-bottom: 1px #dadada solid;
+}
+
+tr:nth-child(even) {
     background: #eee;
 }
 

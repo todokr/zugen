@@ -7,6 +7,5 @@ lazy val root = (project in file("."))
       "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full
     ),
     scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on"),
-    zugenDomainPackages := Seq("example.domain"),
-    zugenDocumentPath := file("../../zugen-docs")
-  ).enablePlugins(ZugenPlugin)
+    zugenDomainPackages := Seq("example.domain")
+  )

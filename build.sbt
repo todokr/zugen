@@ -32,18 +32,6 @@ commands ++= Seq(
   Command.command("runAll") { s =>
     val classesDir = file("src/sbt-test/example/target/scala-2.13/classes")
     val targetPackages = "example.domain"
-    s"runMain zugen.core.Main $classesDir $docDir $targetPackages" ::
-      "copyAssets" ::
-      s
-  },
-  Command.command("copyAssets") { s =>
-    val fromDirectory = resourceDirectory.in(root, Compile).value / "assets"
-    val toDirectory = docDir / "assets"
-    IO.createDirectory(toDirectory)
-    IO.copyDirectory(
-      fromDirectory,
-      toDirectory,
-      CopyOptions(overwrite = true, preserveLastModified = false, preserveExecutable = false))
-    s
+    s"runMain zugen.core.Main $classesDir $docDir $targetPackages" :: s
   }
 )
