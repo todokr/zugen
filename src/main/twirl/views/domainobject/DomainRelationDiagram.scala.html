@@ -4,16 +4,17 @@
 @import zugen.core.document.Document.DomainRelationDiagramDoc
 
 @(doc: DomainRelationDiagramDoc, generatedAt: LocalDateTime)
-@views.html.Layout("Object references") {
-  <h1>Domain Model Relation Diagram</h1>
-  <p>generatedAt: @{generatedAt}</p>
-  <div id="graph" style="text-align: center;"></div>
+@views.html.Layout("Object references", generatedAt) {
+  <div id="domain-relation-diagram">
+    <h1 class="page-title">Domain Model Relation Diagram</h1>
+    <div id="graph"></div>
+  </div>
 } {
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script src="http://unpkg.com/viz.js@@1.8.1/viz.js" type="javascript/worker"></script>
   <script src="http://unpkg.com/d3-graphviz@@2.6.1/build/d3-graphviz.js"></script>
   <script>
-    d3.select("#graph").graphviz()
+    d3.select("#graph").graphviz().height(1200)
       .fade(false)
       .renderDot(`@{Html(ObjectRefs(doc.digraph).toString)}`);
   </script>

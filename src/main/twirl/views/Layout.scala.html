@@ -1,13 +1,20 @@
+@import java.time.LocalDateTime
+@import java.time.format.DateTimeFormatter
 @import play.twirl.api.Html
-@(title: String)(content: Html)(js: Html = Html(""))
+@(title: String, generatedAt: LocalDateTime)(content: Html)(js: Html = Html(""))
 <!DOCTYPE html>
 <html>
 <head>
   <title>@title</title>
-  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.3/build/pure-min.css">
+  <link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
-<section class="content">@content</section>
+<section id="content">@content</section>
+<footer id="footer">
+  <span>Generated at @{generatedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}</span>
+  <span>powered by zugen</span>
+</footer>
 @js
 </body>
 </html>

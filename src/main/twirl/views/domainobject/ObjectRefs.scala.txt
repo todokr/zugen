@@ -5,13 +5,8 @@
 digraph domain_relation_diagram {
   graph [
     charset = "UTF-8";
-    label = "@digraph.label",
-    fontname = "Migu 1M",
-    labelloc = "t",
-    labeljust = "c",
     bgcolor = "#343434",
-    fontcolor = white,
-    fontsize = 18,
+    fontcolor = "#eeeeee",
     style = "filled",
     rankdir = TB,
     margin = 0.2,
@@ -24,31 +19,29 @@ digraph domain_relation_diagram {
 
   node [
     colorscheme = rdylgn11,
-    fontname = "Migu 1M",
+    fontname = "sans-serif",
     color = 7,
-    fontsize = 12,
+    fontsize = 10,
     fontcolor = 6,
     fillcolor = 11,
-    margin = 0.1,
+    margin = 0.05,
     style = "solid,filled"
   ];
 
   edge [
     style = solid,
     fontsize = 10,
-    fontcolor = white,
-    fontname = "Migu 1M",
-    color = white,
+    color = "#cccccc",
     labelfloat = false
   ];
 
   @for(subGraph <- digraph.subGraphs) {
     subgraph cluster_@{subGraph.id} {
-      label = "@subGraph.label";
+      label = "  @subGraph.label  ";
       style = "";
-      color = white;
-      fontname = "Migu 1M";
-      fontsize = 12;
+      color = "#eeeeee";
+      fontname = "sans-serif";
+      fontsize = 10;
       margin = 1;
       pad = 1;
 
@@ -61,7 +54,7 @@ digraph domain_relation_diagram {
   @for(edge <- digraph.edges) {
     @edge match {
       case DomainInternalEdge(from, to, arrowHead) => { @from -> @to [arrowhead = @arrowHead] }
-      case DomainExternalEdge(from, toLabel, _, arrowHead) => { @from -> "@toLabel" [ color = red, arrowhead = @arrowHead] }
+      case DomainExternalEdge(from, toLabel, _, arrowHead) => { @from -> "@toLabel" [ color = "#880000", arrowhead = @arrowHead] }
     }
   }
 }

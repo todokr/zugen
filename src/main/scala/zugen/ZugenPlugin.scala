@@ -29,8 +29,12 @@ object ZugenPlugin extends AutoPlugin {
           documentsToGenerate = DocumentsToGenerate(zugenDocumentsToGenerate.value),
           documentPath = DocumentPath(zugenDocumentPath.value.toPath)
         )
-        val generatedPath = Zugen.generateDocs(config)
 
+        IO.createDirectory(zugenDocumentPath.value / "assets")
+        val cssIn = getClass.getClassLoader.getResourceAsStream("assets/style.css")
+        IO.transfer(cssIn, zugenDocumentPath.value / "assets" / "style.css")
+
+        val generatedPath = Zugen.generateDocs(config)
         generatedPath.pages.foreach { page =>
           println(s"${scala.Console.GREEN}Generated${scala.Console.RESET}: $page")
         }

@@ -18,4 +18,6 @@ object Package extends (String => Package) {
 
   def apply(packageStr: String): Package =
     packageStr.split('.').toIndexedSeq.map(Package.PackageElement).pipe(Package(_))
+
+  val unknown: Package = Package(Seq.empty)
 }

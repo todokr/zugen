@@ -84,15 +84,20 @@ trait DefinitionExtractor {
         case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
         case x              => (x.toString, Seq.empty)
       }
-      val resolvedFQCN = referredFQCNs
+      val pkg = referredFQCNs
         .find { r =>
           r.startLine == init.pos.startLine &&
           r.endLine == init.pos.endLine &&
           r.typeName == typeName
-        }
-        .getOrElse(throw new Exception(s"FQCN for parent not found: typeName = ${typeName}," +
-          s" start = ${init.pos.startLine}, end = ${init.pos.endLine}"))
-      val tpe = Parent.Tpe(typeName, typeArgs, resolvedFQCN.pkg)
+        } match {
+        case Some(fqcn) => fqcn.pkg
+        case None =>
+          println(
+            s"${Console.YELLOW}[WARN]${Console.YELLOW} FQCN for parent not found: typeName = ${typeName}, start = ${init.pos.startLine}, end = ${init.pos.endLine}")
+          Package.unknown
+      }
+
+      val tpe = Parent.Tpe(typeName, typeArgs, pkg)
       Parent(tpe)
     }.pipe(Parents(_))
 
@@ -105,16 +110,16 @@ trait DefinitionExtractor {
         case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
         case x              => (x.toString, Seq.empty)
       }
-      val resolvedFQCN = referredFQCNs
-        .find(_.matches(param.pos.startLine, param.pos.endLine, typeName))
-        .getOrElse(throw new Exception(
-          s"FQCN for constructor not found: " +
-            s"typeName = ${typeName}, typeArgs = ${typeArgs.mkString(",")}, " +
-            s"start = ${param.pos.startLine}, end = ${param.pos.endLine}"))
-      Arg(
-        ArgName(param.name.toString),
-        Constructor.Tpe(typeName, typeArgs, resolvedFQCN.pkg)
-      )
+      val pkg = referredFQCNs
+        .find(_.matches(param.pos.startLine, param.pos.endLine, typeName)) match {
+        case Some(fqcn) => fqcn.pkg
+        case None =>
+          println(s"${Console.YELLOW}[WARN]${Console.YELLOW} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs.mkString(
+            ",")}, start = ${param.pos.startLine}, end = ${param.pos.endLine}")
+          Package.unknown
+      }
+
+      Arg(ArgName(param.name.toString), Constructor.Tpe(typeName, typeArgs, pkg))
     }.pipe(Constructor(_))
 
   private def toModElm(mod: Mod): Option[ModifierElement] =

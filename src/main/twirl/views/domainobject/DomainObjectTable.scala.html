@@ -1,9 +1,8 @@
 @import java.time.LocalDateTime
 @import zugen.core.document.Document.DomainObjectTableDoc
 @(domainObjectDoc: DomainObjectTableDoc, generatedAt: LocalDateTime)
-@views.html.Layout("Domain objects") {
-  <h1>Domain objects</h1>
-  <p>generated at: @{generatedAt}</p>
+@views.html.Layout("Domain objects", generatedAt) {
+  <h1 class="page-title">Domain objects</h1>
   <table>
     <thead>
       <tr>

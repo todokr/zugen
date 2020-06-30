@@ -30,7 +30,7 @@ object Zugen {
     val indexDocument = documentWriter.writeIndexDocument(generatedDocumentPaths, generatedAt, config)
 
     GeneratedDocumentPath(
-      index = indexDocument.path,
+      index = indexDocument.path.toAbsolutePath,
       pages = generatedDocumentPaths.map(_.path.toAbsolutePath)
     )
   }
