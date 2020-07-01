@@ -4,6 +4,7 @@ lazy val root = (project in file("."))
     name := "sbt-zugen",
     organization := "io.github.todokr",
     version := "0.0.1-SNAPSHOT",
+    sbtPlugin := true,
     scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
     scriptedBufferLog := false,
     scalacOptions ++= Seq(

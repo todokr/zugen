@@ -1,33 +1,33 @@
-package zugen
+package zugen.sbt
 
-import sbt._, Keys._
+import sbt.{AutoPlugin, Compile, Def, File, IO, Test, inConfig, settingKey, taskKey, _}
+import Keys._
 import sbt.plugins.JvmPlugin
 import zugen.core.Zugen
 import zugen.core.config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
 import zugen.core.config._
 
+trait PluginInterface {
+
+  // tasks
+  val zugen = taskKey[Unit]("Generate zugen documents")
+
+  // settings
+  val zugenClassesPath = settingKey[File]("Class directory of the project to generate document")
+  val zugenDomainPackages = settingKey[Seq[String]]("Packages contain domain objects")
+  val zugenDocumentsToGenerate = settingKey[Seq[GenDocumentType]]("Document types to generate")
+  val zugenDocumentPath = settingKey[File]("Directory to output documents")
+}
+
 object ZugenPlugin extends AutoPlugin {
 
-  override def trigger = allRequirements
-  override def requires = JvmPlugin
+  override def requires: Plugins = JvmPlugin
+  override def trigger: PluginTrigger = allRequirements
 
-  object autoImport {
-
-    // tasks
-    val zugen = taskKey[Unit]("Generate zugen documents")
-    val exampleTask = taskKey[String]("A task that is automatically imported to the build")
-
-    // settings
-    val zugenClassesPath = settingKey[File]("Class directory of the project to generate document")
-    val zugenDomainPackages = settingKey[Seq[String]]("Packages contain domain objects")
-    val zugenDocumentsToGenerate = settingKey[Seq[GenDocumentType]]("Document types to generate")
-    val zugenDocumentPath = settingKey[File]("Directory to output documents")
-  }
-
+  object autoImport extends PluginInterface
   import autoImport._
 
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
-    exampleTask := "computed from example setting",
     zugen := {
       compile.value
       val config = Config(
@@ -53,8 +53,13 @@ object ZugenPlugin extends AutoPlugin {
     zugenDocumentPath := target.value / "zugen-docs"
   )
 
-  override lazy val projectSettings = inConfig(Compile)(baseZugenSettings) ++ inConfig(Test)(baseZugenSettings)
-  override lazy val buildSettings = Seq.empty
-  override lazy val globalSettings = Seq.empty
-
+  override lazy val projectSettings: Seq[Def.Setting[_]] =
+    inConfig(Compile)(baseZugenSettings) ++ inConfig(Test)(baseZugenSettings)
 }
+
+/**
+  * Keys for zugen sbt plugin.
+  * import this in *.scala build setting.
+  * `import zugen.sbt.ZugenKeys._`
+  */
+object ZugenKeys extends PluginInterface
