@@ -12,9 +12,17 @@ These screenshots are generated in [the example Scala project](https://github.co
 
 A table of domain objects under the specified packages.
 
+- [x] List package, object/trait/class name, scaladoc and file path
+- [ ] Show referrer count
+
 ![Domain object table](https://raw.githubusercontent.com/todokr/zugen/master/docs/domain-object-table.png)
 
 ### Domain relation diagram
+
+- [x] Show inheritance relations
+- [x] Show properties
+- [x] Highlight references which is bound to outside of domain package in red
+- [ ] Handle container class (Seq[T], etc.)
 
 A diagram which indicates relation among domain objects.
 
