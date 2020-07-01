@@ -31,7 +31,7 @@ lazy val root = (project in file("."))
 val docDir = file("zugen-docs")
 commands ++= Seq(
   Command.command("runAll") { s =>
-    val classesDir = file("src/sbt-test/simple/target/scala-2.13/classes")
+    val classesDir = file("src/sbt-test/sbt-zugen/simple/target/scala-2.13/classes")
     val targetPackages = "example.domain"
     s"runMain zugen.core.Main $classesDir $docDir $targetPackages" :: s
   }

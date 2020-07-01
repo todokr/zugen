@@ -2,8 +2,8 @@
 @import zugen.core.document.Document.DomainObjectTableDoc
 @(domainObjectDoc: DomainObjectTableDoc, generatedAt: LocalDateTime)
 @views.html.Layout("Domain objects", generatedAt) {
-  <h1 class="page-title">Domain objects</h1>
-  <div id="domain-object-table">
+  <div id="domain-object-table" class="container">
+    <h1 class="page-title">Domain objects</h1>
     <table>
       <thead>
       <tr>
