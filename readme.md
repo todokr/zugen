@@ -42,10 +42,15 @@ zugenDomainPackages := Seq("your.projects.domain", "your.projects.other.domain")
 
 ## Run
 
-```sbt
-zugen
+```bash
+$ sbt zugen
 ```
 
 Setting keys are defined in [here](https://github.com/todokr/zugen/blob/master/src/main/scala/zugen/sbt/ZugenPlugin.scala#L16-L19).
 
+## Thanks
+Zugen is inspired by JIG, which is a document generator for Java project and its philosophy.  
+
+- [JIG](https://github.com/dddjava/jig)
+- [コードをどまんなかに据えた設計アプローチ](https://speakerdeck.com/irof/kodowodomannakaniju-etashe-ji-apuroti)
 
