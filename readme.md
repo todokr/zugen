@@ -6,7 +6,7 @@ A tool for generating Zu(図) of Scala project.
 
 ## Documents to be generated
 
-These screenshots are generated in [a example Scala project](https://github.com/todokr/zugen/blob/master/src/sbt-test/sbt-zugen/simple/build.sbt).
+These screenshots are generated in [the example Scala project](https://github.com/todokr/zugen/blob/master/src/sbt-test/sbt-zugen/simple/build.sbt).
 
 ### Domain object table
 
