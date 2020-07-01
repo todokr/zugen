@@ -19,12 +19,13 @@ A table of domain objects under the specified packages.
 
 ### Domain relation diagram
 
+A diagram which indicates relation among domain objects.
+
+
 - [x] Show inheritance relations
 - [x] Show properties
 - [x] Highlight references which is bound to outside of domain package in red
 - [ ] Handle container class (Seq[T], etc.)
-
-A diagram which indicates relation among domain objects.
 
 ![Domain relation diagram](https://raw.githubusercontent.com/todokr/zugen/master/docs/domain-relation-diagram.png)
 
