@@ -4,8 +4,11 @@ lazy val root = (project in file("."))
     name := "sbt-zugen",
     organization := "io.github.todokr",
     version := "0.0.1-SNAPSHOT",
-    sbtPlugin := true,
-    scriptedLaunchOpts += ("-Dplugin.version=" + version.value),
+    //sbtPlugin := true,
+    scriptedLaunchOpts := {
+      scriptedLaunchOpts.value ++
+        Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+    },
     scriptedBufferLog := false,
     scalacOptions ++= Seq(
       "-feature",
@@ -14,10 +17,7 @@ lazy val root = (project in file("."))
       "-Xlint",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen",
-      "-Ywarn-unused",
-      "-language:existentials",
-      "-language:higherKinds",
-      "-language:implicitConversions"
+      "-Ywarn-unused"
     ),
     libraryDependencies ++= Seq(
       "org.scalameta" %% "scalameta" % "4.3.17",
@@ -31,7 +31,7 @@ lazy val root = (project in file("."))
 val docDir = file("zugen-docs")
 commands ++= Seq(
   Command.command("runAll") { s =>
-    val classesDir = file("src/sbt-test/example/target/scala-2.13/classes")
+    val classesDir = file("src/sbt-test/simple/target/scala-2.13/classes")
     val targetPackages = "example.domain"
     s"runMain zugen.core.Main $classesDir $docDir $targetPackages" :: s
   }
