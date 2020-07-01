@@ -3,8 +3,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "sbt-zugen",
     organization := "io.github.todokr",
-    version := "0.0.1-SNAPSHOT",
-    //sbtPlugin := true,
+    version := "0.0.1",
     scriptedLaunchOpts := {
       scriptedLaunchOpts.value ++
         Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
@@ -28,11 +27,27 @@ lazy val root = (project in file("."))
     TwirlKeys.templateImports := Seq.empty
   )
 
-val docDir = file("zugen-docs")
-commands ++= Seq(
-  Command.command("runAll") { s =>
-    val classesDir = file("src/sbt-test/sbt-zugen/simple/target/scala-2.13/classes")
-    val targetPackages = "example.domain"
-    s"runMain zugen.core.Main $classesDir $docDir $targetPackages" :: s
-  }
+description := "A tool for generating Zu(図) of Scala project architecture"
+licenses := List("EPL 2.0" -> new URL("https://www.eclipse.org/legal/epl-2.0/"))
+homepage := Some(url("https://github.com/todokr/zugen"))
+developers := List(
+  Developer(
+    id = "todokr",
+    name = "Shunsuke Tadokoro",
+    email = "s.tadokoro0317@gmail.com",
+    url = url("https://github.com/todokr")
+  )
 )
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/todokr/zugen"),
+    "scm:git@github.com:todokr/zugen.git"
+  )
+)
+pomIncludeRepository := { _ => false }
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+publishMavenStyle := true
