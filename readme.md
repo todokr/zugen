@@ -45,7 +45,7 @@ addSbtPlugin("io.github.todokr" % "sbt-zugen" % "(version)")
 addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full)
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 
-enableplugins(ZugenPlugin)
+enablePlugins(ZugenPlugin)
 zugenDomainPackages := Seq("your.projects.domain", "your.projects.other.domain")
 ```
 
