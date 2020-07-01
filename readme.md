@@ -24,7 +24,7 @@ A diagram which indicates relation among domain objects.
 
 ### `project/plugins.sbt`
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/zugen)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/sbt-zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/sbt-zugen)
 
 ```sbt
 addSbtPlugin("io.github.todokr" % "sbt-zugen" % "(version)")
