@@ -1,9 +1,7 @@
 @import java.time.LocalDateTime
 @import play.twirl.api.Html
-@import views.txt.domainobject.ObjectRefs
-@import zugen.core.document.Document.DomainRelationDiagramDoc
 
-@(doc: DomainRelationDiagramDoc, generatedAt: LocalDateTime)
+@(dot: String, generatedAt: LocalDateTime)
 @views.html.Layout("Domain Relation Diagram", generatedAt) {
   <div id="domain-relation-diagram" class="container">
     <h1 class="page-title">Domain Relation Diagram</h1>
@@ -16,6 +14,6 @@
   <script>
     d3.select("#graph").graphviz().height(1200)
       .fade(false)
-      .renderDot(`@{Html(ObjectRefs(doc.digraph).toString)}`);
+      .renderDot(`@{Html(dot)}`);
   </script>
 }

@@ -18,7 +18,8 @@ object HtmlDocumentWriter extends DocumentWriter {
       case doc: DomainObjectTableDoc =>
         doc -> views.html.domainobject.DomainObjectTable(doc, generatedAt).body
       case doc: DomainRelationDiagramDoc =>
-        doc -> views.html.domainobject.DomainRelationDiagram(doc, generatedAt).body
+        val dot = views.txt.domainobject.ObjectRefs(doc.digraph).body.replace("""`""", """\`""")
+        doc -> views.html.domainobject.DomainRelationDiagram(dot, generatedAt).body
     }
     val filePath = config.documentPath.value.resolve(s"${doc.docCode}.html")
 
