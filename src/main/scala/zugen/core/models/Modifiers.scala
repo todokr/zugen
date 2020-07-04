@@ -2,14 +2,10 @@ package zugen.core.models
 
 import zugen.core.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
 
-/**
-  * modifiers for class etc.
-  */
+/** modifiers for class etc. */
 case class Modifiers(elems: Seq[ModifierElement]) {
 
-  /**
-    * modifiers related to accessibility
-    */
+  /** modifiers related to accessibility */
   def accessibility: String =
     elems
       .find(_.isInstanceOf[AccessibilityModifierElement])

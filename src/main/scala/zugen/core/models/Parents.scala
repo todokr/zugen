@@ -2,9 +2,7 @@ package zugen.core.models
 
 import zugen.core.models.Parents.Parent
 
-/**
-  * parents of class etc.
-  */
+/** parents of class etc. */
 case class Parents(elms: Seq[Parent])
 
 object Parents {

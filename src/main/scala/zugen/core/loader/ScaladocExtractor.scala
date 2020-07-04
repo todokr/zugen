@@ -10,9 +10,7 @@ import zugen.core.models.{FileName, Scaladocs}
 
 trait ScaladocExtractor {
 
-  /**
-    * extract scaladoc from SemanticDB TextDocument
-    */
+  /** extract scaladoc from SemanticDB TextDocument */
   def extractScaladocs(docs: Seq[TextDocument]): Scaladocs =
     docs.flatMap { doc =>
       val tokens =

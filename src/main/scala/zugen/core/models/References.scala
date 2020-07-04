@@ -3,9 +3,7 @@ package zugen.core.models
 import zugen.core.models.Definitions.DefinitionBlock
 import zugen.core.models.References.Reference
 
-/**
-  * references that class etc. refers
-  */
+/** references that class etc. refers */
 case class References(elms: Seq[Reference])
 
 object References {

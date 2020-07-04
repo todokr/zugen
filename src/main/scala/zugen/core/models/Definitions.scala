@@ -7,9 +7,7 @@ import zugen.core.models.DocumentMaterial.DocumentMaterialElement
 import zugen.core.models.References.ExternalReference.{ExternalInheritance, ExternalProperty}
 import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
 
-/**
-  * definition blocks of class etc.
-  */
+/** definition blocks of class etc. */
 case class Definitions(blocks: Seq[DefinitionBlock]) {
 
   def mergeWithScaladoc(scaladocs: Scaladocs): DocumentMaterial =
@@ -35,9 +33,7 @@ object Definitions {
     val startLine: Int
     val endLine: Int
 
-    /**
-      * resolve reference to other definition block
-      */
+    /** resolve reference to other definition block */
     def resolveReferences(from: Definitions): References =
       parents.elms
         .map { parent =>

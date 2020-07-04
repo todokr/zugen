@@ -27,9 +27,7 @@ object HtmlDocumentWriter extends DocumentWriter {
     GeneratedDocument(doc.docName, filePath)
   }
 
-  /**
-    * generate index document for generated documents
-    */
+  /** generate index document for generated documents */
   override def writeIndexDocument(
     generatedDocuments: Seq[GeneratedDocument],
     generatedAt: LocalDateTime,

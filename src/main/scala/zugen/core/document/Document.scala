@@ -13,9 +13,7 @@ import zugen.core.models
 import zugen.core.models.{DefinitionName, DocumentMaterial, FileName, Package}
 import zugen.core.models.Scaladocs.ScaladocBlock
 
-/**
-  * Zugen document
-  */
+/** Zugen document */
 sealed trait Document {
 
   val docCode: String
@@ -24,9 +22,7 @@ sealed trait Document {
 
 object Document {
 
-  /**
-    * domain object table
-    */
+  /** domain object table */
   final case class DomainObjectTableDoc(rows: Seq[DomainObjectTableRow]) extends Document {
 
     override val docCode: String = "domain-object-table"
@@ -56,9 +52,7 @@ object Document {
     )
   }
 
-  /**
-    * domain object relation diagram
-    */
+  /** domain object relation diagram */
   final case class DomainRelationDiagramDoc(digraph: Digraph) extends Document {
 
     override val docCode: String = "domain-relation-diagram"
@@ -116,14 +110,10 @@ object Document {
     case class SubGraph(id: SubGraphId, label: String, nodes: Seq[Node])
     sealed trait Edge
 
-    /**
-      * edge of domain-internal
-      */
+    /** edge of domain-internal */
     case class DomainInternalEdge(from: NodeId, to: NodeId, arrowHead: ArrowType) extends Edge
 
-    /**
-      * edge bounds to outside of domain
-      */
+    /** edge bounds to outside of domain */
     case class DomainExternalEdge(from: NodeId, toLabel: String, toPkg: models.Package, arrowHead: ArrowType)
         extends Edge
 

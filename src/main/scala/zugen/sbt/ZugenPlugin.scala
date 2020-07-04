@@ -57,8 +57,8 @@ object ZugenPlugin extends AutoPlugin {
     inConfig(Compile)(baseZugenSettings) ++ inConfig(Test)(baseZugenSettings)
 }
 
-/**
-  * Keys for zugen sbt plugin.
+/** Keys for zugen sbt plugin.
+  *
   * import this in *.scala build setting.
   * `import zugen.sbt.ZugenKeys._`
   */

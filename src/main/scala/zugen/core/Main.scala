@@ -5,9 +5,7 @@ import scala.util.chaining._
 import zugen.core.config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
 import zugen.core.config.{ClassesPath, Config, DocumentPath, DocumentsToGenerate, DomainPackageName}
 
-/**
-  * entry point for debug
-  */
+/** entry point for debug */
 object Main {
 
   def main(args: Array[String]): Unit = {

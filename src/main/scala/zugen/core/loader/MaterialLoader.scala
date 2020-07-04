@@ -5,8 +5,6 @@ import zugen.core.models.DocumentMaterial
 
 trait MaterialLoader {
 
-  /**
-    * load document material from source specified in given config
-    */
+  /** load document material from source specified in given config */
   def load(config: Config): DocumentMaterial
 }

@@ -16,9 +16,7 @@ import zugen.core.models.{Constructor, DefinitionName, Definitions, FileName, Mo
 trait DefinitionExtractor {
   import Ops._
 
-  /**
-    * extract definition block of class etc.
-    */
+  /** extract definition block of class etc. */
   def extractDefinitions(docs: Seq[TextDocument]): Definitions =
     docs.flatMap { doc =>
       val packages = doc.text.parse[Source].get.collect { case p: Pkg => p }
@@ -134,9 +132,7 @@ trait DefinitionExtractor {
       case _                               => None
     }
 
-  /**
-    * Fully Qualified Class Names of symbol occurred in source code
-    */
+  /** Fully Qualified Class Names of symbol occurred in source code */
   case class ReferredFQCN(startLine: Int, endLine: Int, fqcn: String) {
 
     val typeName: String = fqcn.split("/").last
