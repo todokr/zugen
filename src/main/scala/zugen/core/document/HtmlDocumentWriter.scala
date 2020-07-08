@@ -5,7 +5,6 @@ import java.nio.file.Files
 import java.time.LocalDateTime
 
 import zugen.core.config.Config
-import zugen.core.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
 
 object HtmlDocumentWriter extends DocumentWriter {
 
@@ -15,11 +14,13 @@ object HtmlDocumentWriter extends DocumentWriter {
     config: Config
   ): GeneratedDocument = {
     val (doc, html) = document match {
-      case doc: DomainObjectTableDoc =>
+      case doc: DomainObjectTableDocument =>
         doc -> views.html.domainobject.DomainObjectTable(doc, generatedAt).body
-      case doc: DomainRelationDiagramDoc =>
+      case doc: DomainRelationDiagramDocument =>
         val dot = views.txt.domainobject.ObjectRefs(doc.digraph).body.replace("""`""", """\`""")
         doc -> views.html.domainobject.DomainRelationDiagram(dot, generatedAt).body
+      case doc: UsecaseTableDocument =>
+        doc -> "this is test"
     }
     val filePath = config.documentPath.value.resolve(s"${doc.docCode}.html")
 

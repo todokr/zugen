@@ -4,9 +4,14 @@ import java.nio.file.{Files, Path}
 import java.time.{Clock, LocalDateTime}
 
 import zugen.core.config.Config
-import zugen.core.config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram}
-import zugen.core.document.Document.{DomainObjectTableDoc, DomainRelationDiagramDoc}
-import zugen.core.document.{DocumentWriter, HtmlDocumentWriter}
+import zugen.core.config.GenDocumentType.{GenDomainObjectTable, GenDomainRelationDiagram, GenUsecaseTable}
+import zugen.core.document.{
+  DocumentWriter,
+  DomainObjectTableDocument,
+  DomainRelationDiagramDocument,
+  HtmlDocumentWriter,
+  UsecaseTableDocument
+}
 import zugen.core.loader.{MaterialLoader, SemanticDBMaterialLoader}
 
 object Zugen {
@@ -23,8 +28,10 @@ object Zugen {
 
     val documentMaterial = materialLoader.load(config)
     val zugenDocuments = config.documentsToGenerate.genDocTypes.map {
-      case GenDomainObjectTable     => DomainObjectTableDoc.of(documentMaterial, config)
-      case GenDomainRelationDiagram => DomainRelationDiagramDoc.of(documentMaterial, config)
+      case GenDomainObjectTable     => DomainObjectTableDocument.of(documentMaterial, config)
+      case GenDomainRelationDiagram => DomainRelationDiagramDocument.of(documentMaterial, config)
+      case GenUsecaseTable          => UsecaseTableDocument.of(documentMaterial, config)
+      case other                    => throw new Exception(s"Unknown document type: $other")
     }
     val generatedDocumentPaths = zugenDocuments.map(documentWriter.writeDocument(_, generatedAt, config))
     val indexDocument = documentWriter.writeIndexDocument(generatedDocumentPaths, generatedAt, config)

@@ -1,6 +1,6 @@
 @import java.time.LocalDateTime
-@import zugen.core.document.Document.DomainObjectTableDoc
-@(domainObjectDoc: DomainObjectTableDoc, generatedAt: LocalDateTime)
+@import zugen.core.document.DomainObjectTableDocument
+@(domainObjectDoc: DomainObjectTableDocument, generatedAt: LocalDateTime)
 @views.html.Layout("Domain objects", generatedAt) {
   <div id="domain-object-table" class="container">
     <h1 class="page-title">Domain objects</h1>

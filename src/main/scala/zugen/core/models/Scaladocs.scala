@@ -1,7 +1,7 @@
 package zugen.core.models
 
 import zugen.core.models.Definitions.DefinitionBlock
-import Scaladocs.ScaladocBlock
+import zugen.core.models.Scaladocs.ScaladocBlock
 
 /** scaladocs in a source code file */
 case class Scaladocs(blocks: Seq[ScaladocBlock]) {

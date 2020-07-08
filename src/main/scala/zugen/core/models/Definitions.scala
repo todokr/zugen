@@ -2,7 +2,7 @@ package zugen.core.models
 
 import scala.util.chaining._
 
-import zugen.core.models.Definitions._
+import zugen.core.models.Definitions.DefinitionBlock
 import zugen.core.models.DocumentMaterial.DocumentMaterialElement
 import zugen.core.models.References.ExternalReference.{ExternalInheritance, ExternalProperty}
 import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}

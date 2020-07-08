@@ -1,16 +1,16 @@
 package zugen.core.models
 
-import zugen.core.models.Constructor.Arg
+import zugen.core.models.Constructor.Argument
 
-case class Constructor(args: Seq[Arg])
+final case class Constructor(args: Seq[Argument])
 
 object Constructor {
 
-  case class Arg(name: ArgName, tpe: Tpe) {
+  final case class Argument(name: ArgumentName, tpe: ArgumentType) {
     override def toString: String = s"$name: ${tpe.typeName}"
   }
-  case class ArgName(value: String) extends AnyVal {
+  final case class ArgumentName(value: String) extends AnyVal {
     override def toString: String = value
   }
-  case class Tpe(typeName: String, typeArgs: Seq[String], pkg: Package)
+  final case class ArgumentType(typeName: String, typeArgs: Seq[String], pkg: Package)
 }
