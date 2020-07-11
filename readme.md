@@ -39,7 +39,7 @@ A diagram which indicates relation among domain objects.
 #### project/plugins.sbt
 
 ```sbt
-addSbtPlugin("io.github.todokr" % "sbt-zugen" % "0.1")
+addSbtPlugin("io.github.todokr" % "sbt-zugen" % "2020.7.0")
 ```
 
 #### project/zugen.properties
