@@ -27,6 +27,7 @@ object ZugenPlugin extends AutoPlugin {
 
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
     zugen := {
+      compile.value
       val config = zugenConfig.value
       IO.createDirectory(config.documentPath.value.resolve("assets").toFile)
 
@@ -56,32 +57,35 @@ object ZugenPlugin extends AutoPlugin {
     val prop = new java.util.Properties()
     if (file(PropFileName).exists()) {
       IO.load(prop, file(PropFileName))
-      if (!prop.isEmpty) {
-        Right(prop)
-      } else {
-        Left(new Exception(s"properties file is empty: $PropFileName"))
-      }
+      if (prop.isEmpty) println(s"${scala.Console.YELLOW}[WARN]${scala.Console.RESET} $PropFileName is empty")
+      Right(prop)
     } else {
       Left(new FileNotFoundException(s"setting file not found: $PropFileName"))
     }
   }
 
+  private val DocumentsToGenerateKey = "documentsToGenerate"
+  private val DomainPackagesKey = "domainPackages"
+  private val DomainObjectExcludePatterns = "domainObjectExcludePatterns"
+  private val DocumentPathKey = "documentPath"
+  private val ClassesPathKey = "classesPath"
+
   private def loadConfig: Def.Initialize[Task[Properties => Config]] =
     Def.task { prop =>
       val documentsToGenerate =
-        getStringList(prop, "documentsToGenerate")
+        getStringList(prop, DocumentsToGenerateKey)
           .map(GenDocumentType.from)
           .collect { case Some(x) => x } match {
           case xs if xs.isEmpty => DocumentsToGenerate(GenDocumentType.values)
           case xs               => DocumentsToGenerate(xs)
         }
 
-      val domainPackages = getStringList(prop, "domainPackages").map(DomainPackageName)
-      val domainObjectExcludePatterns = getStringList(prop, "domainObjectExcludePatterns")
-      val documentPath = getString(prop, "documentPath")
+      val domainPackages = getStringList(prop, DomainPackagesKey).map(DomainPackageName)
+      val domainObjectExcludePatterns = getStringList(prop, DomainObjectExcludePatterns)
+      val documentPath = getString(prop, DocumentPathKey)
         .getOrElse((target.value / "zugen-docs").toString)
         .pipe(DocumentPath)
-      val classesPath = getString(prop, "classesPath").getOrElse(classDirectory.value.toString).pipe(ClassesPath)
+      val classesPath = getString(prop, ClassesPathKey).getOrElse(classDirectory.value.toString).pipe(ClassesPath)
 
       Config(
         documentsToGenerate = documentsToGenerate,
