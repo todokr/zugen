@@ -21,9 +21,9 @@ object DomainRelationDiagramDocument {
 
   def of(documentMaterial: DocumentMaterial, config: Config): DomainRelationDiagramDocument = {
     val domainPackages = config.domainPackages.map(n => Package(n.value))
+    val domainInternalElements = documentMaterial.elms.filter(_.definition.isInAnyPackage(domainPackages))
 
-    val subGraphs = documentMaterial.elms
-      .filter(elm => elm.definition.isInAnyPackage(domainPackages)) // サブグラフとノードは、ドメインのパッケージに所属する定義ブロックのみに絞り込む
+    val subGraphs = domainInternalElements
       .groupBy(_.definition.pkg)
       .map {
         case (pkg, materials) =>
@@ -33,10 +33,11 @@ object DomainRelationDiagramDocument {
       }
       .toSeq
 
-    val edges = documentMaterial.elms
+    val edges = domainInternalElements
       .flatMap { materialElm =>
         val definition = materialElm.definition
         materialElm.references.elms.collect {
+          // relation between domain-internal nodes
           case ref: InternalReference if ref.definition.isInAnyPackage(domainPackages) =>
             val from = Node.genId(definition)
             val to = Node.genId(ref.definition)
@@ -45,9 +46,10 @@ object DomainRelationDiagramDocument {
               case _: InternalProperty    => Diamond
             }
             DomainInternalEdge(from, to, arrowHead)
+          // relation bounds to outside of domain
           case ref: InternalReference =>
             val from = Node.genId(definition)
-            val toLabel = s"${ref.definition.pkg}\n${ref.definition.name}"
+            val toLabel = s"${ref.definition.pkg}.${ref.definition.name}"
             val toPkg = ref.definition.pkg
             val arrowHead = ref match {
               case _: InternalInheritance => Normal
@@ -75,7 +77,7 @@ object DomainRelationDiagramDocument {
   case class DomainExternalEdge(from: NodeId, toLabel: String, toPkg: Package, arrowHead: ArrowType) extends Edge
 
   case class Node(id: NodeId, name: String, alias: Option[String]) {
-    def label: String = alias.map(a => s"$name\n$a").getOrElse(name)
+    def label: String = alias.map(a => s"$name\n&quot;$a&quot;").getOrElse(name)
   }
 
   object SubGraph {

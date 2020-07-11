@@ -19,8 +19,6 @@ object HtmlDocumentWriter extends DocumentWriter {
       case doc: DomainRelationDiagramDocument =>
         val dot = views.txt.domainobject.ObjectRefs(doc.digraph).body.replace("""`""", """\`""")
         doc -> views.html.domainobject.DomainRelationDiagram(dot, generatedAt).body
-      case doc: UsecaseTableDocument =>
-        doc -> "this is test"
     }
     val filePath = config.documentPath.value.resolve(s"${doc.docCode}.html")
 

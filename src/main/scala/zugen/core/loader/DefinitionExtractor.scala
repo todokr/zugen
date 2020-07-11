@@ -1,7 +1,6 @@
 package zugen.core.loader
 
 import scala.meta._
-import scala.meta.internal.semanticdb.SymbolOccurrence.Role
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
 import scala.util.chaining._
 
@@ -14,7 +13,6 @@ import zugen.core.models.Parents.Parent
 import zugen.core.models.{Constructor, DefinitionName, Definitions, FileName, Modifiers, Package, Parents}
 
 trait DefinitionExtractor {
-  import Ops._
 
   /** extract definition block of class etc. */
   def extractDefinitions(docs: Seq[TextDocument]): Definitions =
@@ -26,13 +24,15 @@ trait DefinitionExtractor {
 
         val referredFQCNs = doc.occurrences
           .collect {
-            case s @ SymbolOccurrence(Some(range), _, Role.REFERENCE) =>
+            case SymbolOccurrence(Some(range), symbol, _) =>
               ReferredFQCN(
                 startLine = range.startLine,
                 endLine = range.endLine,
-                fqcn = s.fqcn
+                startColumn = range.startCharacter,
+                endColumn = range.endCharacter,
+                fqcn = symbol.init // TODO hack
               )
-          }
+          }.sortBy(_.startLine)
 
         packages.flatMap { p =>
           val pkg = Package(p.ref.toString)
@@ -93,19 +93,21 @@ trait DefinitionExtractor {
     inits
       .map { init =>
         val (typeName, typeArgs) = init.tpe match {
-          case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
+          // TODO handle more nested case
+          case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString)) // ex: ParentClass[TypeParam]
           case x              => (x.toString, Seq.empty)
         }
         val pkg = referredFQCNs
           .find { r =>
             r.startLine == init.pos.startLine &&
             r.endLine == init.pos.endLine &&
-            r.typeName == typeName
+            r.startColumn == init.pos.startColumn &&
+            r.endColumn == init.pos.endColumn
           } match {
           case Some(fqcn) => fqcn.pkg
           case None =>
             println(
-              s"${Console.YELLOW}[WARN]${Console.YELLOW} FQCN for parent not found: typeName = ${typeName}, start = ${init.pos.startLine}, end = ${init.pos.endLine}"
+              s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for parent not found: typeName = ${typeName},  ${init.pos.startLine}:${init.pos.endLine} ${init.pos.startColumn}~${init.pos.endColumn}"
             )
             Package.unknown
         }
@@ -121,20 +123,31 @@ trait DefinitionExtractor {
   ): Constructor =
     params
       .map { param =>
-        val tpe = param.decltpe.getOrElse(
+        val tpe = param.decltpe.map {
+          // TODO handle more nested case
+          case Type.Apply(name, _) => name // ex: Id[T] -> Id
+          case x                   => x
+        }.getOrElse(
           throw new Exception(s"Declaration type not found for $param")
         )
+
         val (typeName, typeArgs) = tpe match {
+          // TODO handle more nested case
           case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
           case x              => (x.toString, Seq.empty)
         }
         val pkg = referredFQCNs
-          .find(_.matches(param.pos.startLine, param.pos.endLine, typeName)) match {
+          .find { r =>
+            r.startLine == tpe.pos.startLine &&
+            r.endLine == tpe.pos.endLine &&
+            r.startColumn == tpe.pos.startColumn &&
+            r.endColumn == tpe.pos.endColumn
+          } match {
           case Some(fqcn) => fqcn.pkg
           case None =>
             println(
-              s"${Console.YELLOW}[WARN]${Console.YELLOW} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs
-                .mkString(",")}, start = ${param.pos.startLine}, end = ${param.pos.endLine}"
+              s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs
+                .mkString(",")}, ${param.pos.startLine}:${param.pos.endLine} ${param.pos.startColumn}~${param.pos.endColumn}"
             )
             Package.unknown
         }
@@ -161,24 +174,17 @@ trait DefinitionExtractor {
     }
 
   /** Fully Qualified Class Names of symbol occurred in source code */
-  case class ReferredFQCN(startLine: Int, endLine: Int, fqcn: String) {
+  case class ReferredFQCN(
+    startLine: Int,
+    endLine: Int,
+    startColumn: Int,
+    endColumn: Int,
+    fqcn: String
+  ) {
 
     val typeName: String = fqcn.split("/").last
     val pkg: Package = Package(
       fqcn.split("/").toIndexedSeq.init.map(PackageElement)
     )
-
-    def matches(startLine: Int, endLine: Int, typeName: String): Boolean = {
-      this.startLine == startLine && this.endLine == endLine &&
-      (this.typeName == typeName || this.typeName == s"Predef.$typeName") // TODO hack
-    }
-  }
-
-  private object Ops {
-
-    implicit class RichSymbolOccurrence(occurrence: SymbolOccurrence) {
-
-      def fqcn: String = occurrence.symbol.init // TODO hack
-    }
   }
 }

@@ -40,7 +40,4 @@ object GenDocumentType {
 
   /** relation diagram of domain objects */
   case object GenDomainRelationDiagram extends GenDocumentType
-
-  /** table of usecases */
-  case object GenUsecaseTable extends GenDocumentType
 }
