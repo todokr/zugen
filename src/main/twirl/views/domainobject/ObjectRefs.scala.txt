@@ -1,5 +1,5 @@
-@import zugen.core.document.Document.DomainRelationDiagramDoc.Digraph
-@import zugen.core.document.Document.DomainRelationDiagramDoc.{DomainInternalEdge, DomainExternalEdge}
+@import zugen.core.document.DomainRelationDiagramDocument.Digraph
+@import zugen.core.document.DomainRelationDiagramDocument.{DomainInternalEdge, DomainExternalEdge}
 
 @(digraph: Digraph)
 digraph domain_relation_diagram {

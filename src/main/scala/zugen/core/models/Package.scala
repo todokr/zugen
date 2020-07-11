@@ -1,7 +1,8 @@
 package zugen.core.models
 
 import scala.util.chaining._
-import Package.PackageElement
+
+import zugen.core.models.Package.PackageElement
 
 case class Package(elems: Seq[PackageElement]) {
 
@@ -17,7 +18,11 @@ object Package extends (String => Package) {
   }
 
   def apply(packageStr: String): Package =
-    packageStr.split('.').toIndexedSeq.map(Package.PackageElement).pipe(Package(_))
+    packageStr
+      .split('.')
+      .toIndexedSeq
+      .map(Package.PackageElement)
+      .pipe(Package(_))
 
   val unknown: Package = Package(Seq.empty)
 }

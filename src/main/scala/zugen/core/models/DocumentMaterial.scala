@@ -1,8 +1,8 @@
 package zugen.core.models
 
 import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.DocumentMaterial.DocumentMaterialElement
 import zugen.core.models.Scaladocs.ScaladocBlock
+import DocumentMaterial._
 
 /** material of zugen document */
 case class DocumentMaterial(elms: Seq[DocumentMaterialElement])
