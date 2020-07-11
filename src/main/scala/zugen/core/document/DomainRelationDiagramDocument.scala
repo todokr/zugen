@@ -21,7 +21,9 @@ object DomainRelationDiagramDocument {
 
   def of(documentMaterial: DocumentMaterial, config: Config): DomainRelationDiagramDocument = {
     val domainPackages = config.domainPackages.map(n => Package(n.value))
-    val domainInternalElements = documentMaterial.elms.filter(_.definition.isInAnyPackage(domainPackages))
+    val domainInternalElements = documentMaterial.elms
+      .filter(_.definition.isInAnyPackage(domainPackages))
+      .filterNot(elm => config.domainObjectExcludePatterns.exists(p => elm.definition.name.value.matches(p)))
 
     val subGraphs = domainInternalElements
       .groupBy(_.definition.pkg)

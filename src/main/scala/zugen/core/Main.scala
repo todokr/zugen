@@ -17,7 +17,7 @@ object Main {
         val documentsToGenerate =
           Seq(GenDomainObjectTable, GenDomainRelationDiagram).pipe(DocumentsToGenerate)
         val documentPath = DocumentPath(docsDir)
-        val config = Config(classesPath, domainPackageNames, documentsToGenerate, documentPath)
+        val config = Config(documentsToGenerate, domainPackageNames, Seq.empty, documentPath, classesPath)
         val generatedPath = Zugen.generateDocs(config)
         generatedPath.pages.foreach { page =>
           println(s"${scala.Console.GREEN}Generated${scala.Console.RESET}: $page")
