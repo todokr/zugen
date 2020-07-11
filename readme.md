@@ -1,6 +1,6 @@
 # Zugen
 
-[![Build Status](https://travis-ci.org/todokr/zugen.svg?branch=master)](https://travis-ci.org/todokr/zugen)
+[![Build Status](https://travis-ci.org/todokr/zugen.svg?branch=trunk)](https://travis-ci.org/todokr/zugen)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/sbt-zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/sbt-zugen)
 
 An architecture diagram generator for Scala project.
