@@ -47,7 +47,7 @@ ul, li {
 
 .page-title {
   margin: 0;
-  padding: 16px;
+  padding: 16px 0;
   font-size: 16px;
   font-weight: normal
 }
@@ -91,9 +91,11 @@ tr:nth-child(even) {
 
 #domain-relation-diagram svg {
   height: calc(100vh - 55px - 32px - 40px)!important;
+  width: 100%;
 }
 
 #domain-relation-diagram .page-title {
+  padding: 16px;
   color: #ddd;
 }
 

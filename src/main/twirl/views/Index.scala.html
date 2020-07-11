@@ -3,8 +3,8 @@
 
 @(documents: Seq[GeneratedDocument], generatedAt: LocalDateTime)
 @views.html.Layout("Domain objects", generatedAt) {
-<h1 class="page-title">Zugen Documents</h1>
-<div id="index-page">
+<div id="index-page" class="container">
+  <h1 class="page-title">Zugen Documents</h1>
   <nav>
     <ul>
       @for(doc <- documents) {
