@@ -53,10 +53,10 @@ domainObjectExcludePatterns=".+Repository"
 
 | key                         | description                                                               | available values                                   | default           | example                                                         |
 |-----------------------------|---------------------------------------------------------------------------|----------------------------------------------------|-------------------|-----------------------------------------------------------------|
-| documentsToGenerate         | Document types to generate.<br>If empty, generates all kind of documents. | `domain-object-table`<br>`domain-relation-diagram` | <empty>           | documentsToGenerate=domain-object-table,domain-relation-diagram |
-| domainPackages              | Package names which represent domain.                                     | <comma separated string>                           | <empty>           | domainPackages=app1.domain,app2.domain                          |
-| domainObjectExcludePatterns | Regex patterns to exclude classes from domain relation diagram.           | <comma separated string>                           | <empty>           | domainObjectExcludePatterns=".+Repository"                      |
-| documentPath                | Directory to output documents                                             | <string>                                           | target/zugen-docs | documentPath=docs                                               |
+| documentsToGenerate         | Document types to generate.<br>If empty, generates all kind of documents. | `domain-object-table`<br>`domain-relation-diagram` | *empty*           | documentsToGenerate=domain-object-table,domain-relation-diagram |
+| domainPackages              | Package names which represent domain.                                     | *comma separated string*                           | *empty*           | domainPackages=app1.domain,app2.domain                          |
+| domainObjectExcludePatterns | Regex patterns to exclude classes from domain relation diagram.           | *comma separated string*                           | *empty*           | domainObjectExcludePatterns=".+Repository"                      |
+| documentPath                | Directory to output documents                                             | *string*                                           | target/zugen-docs | documentPath=docs                                               |
 
 #### build.sbt
 
