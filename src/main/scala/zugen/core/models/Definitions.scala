@@ -4,8 +4,8 @@ import scala.util.chaining._
 
 import zugen.core.models.Definitions.DefinitionBlock
 import zugen.core.models.DocumentMaterial.DocumentMaterialElement
-import zugen.core.models.References.ExternalReference.{ExternalInheritance, ExternalProperty}
-import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
+import zugen.core.models.References.ProjectExternalReference.{ProjectExternalInheritance, ProjectExternalProperty}
+import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInheritance, ProjectInternalProperty}
 
 /** definition blocks of class etc. */
 case class Definitions(blocks: Seq[DefinitionBlock]) {
@@ -41,8 +41,8 @@ object Definitions {
           defBlock -> parent.tpe
         }
         .collect {
-          case (Some(block), _) => InternalInheritance(block)
-          case (None, tpe)      => ExternalInheritance(tpe.pkg, tpe.typeName)
+          case (Some(block), _) => ProjectInternalInheritance(block)
+          case (None, tpe)      => ProjectExternalInheritance(tpe.pkg, tpe.typeName)
         }.pipe(References(_))
 
     def isInAnyPackage(targets: Seq[Package]): Boolean = targets.exists(pkg.isInPackage)
@@ -66,11 +66,11 @@ object Definitions {
         val properties = constructor.args
           .map { arg =>
             val defBlock = from.blocks.find(b => b.pkg == arg.tpe.pkg && b.name.value == arg.tpe.typeName)
-            defBlock -> arg.tpe
+            arg -> defBlock
           }
           .collect {
-            case (Some(block), _) => InternalProperty(block)
-            case (None, tpe)      => ExternalProperty(tpe.pkg, tpe.typeName)
+            case (arg, Some(block)) => ProjectInternalProperty(arg.name.toString, block)
+            case (arg, None)        => ProjectExternalProperty(arg.tpe.pkg, arg.tpe.typeName)
           }
         References(inheritances.elms ++ properties)
       }

@@ -5,8 +5,7 @@ import scala.util.chaining._
 import zugen.core.config.Config
 import zugen.core.document.DomainRelationDiagramDocument.Digraph
 import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.References.InternalReference
-import zugen.core.models.References.InternalReference.{InternalInheritance, InternalProperty}
+import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInheritance, ProjectInternalProperty}
 import zugen.core.models.Scaladocs.ScaladocBlock
 import zugen.core.models.{DocumentMaterial, Package}
 
@@ -39,25 +38,28 @@ object DomainRelationDiagramDocument {
       .flatMap { materialElm =>
         val definition = materialElm.definition
         materialElm.references.elms.collect {
-          // relation between domain-internal nodes
-          case ref: InternalReference if ref.definition.isInAnyPackage(domainPackages) =>
+          // domain-internal -> domain-internal
+          case ref: ProjectInternalInheritance if ref.definition.isInAnyPackage(domainPackages) =>
             val from = Node.genId(definition)
             val to = Node.genId(ref.definition)
-            val arrowHead = ref match {
-              case _: InternalInheritance => Normal
-              case _: InternalProperty    => Diamond
-            }
-            DomainInternalEdge(from, to, arrowHead)
-          // relation bounds to outside of domain
-          case ref: InternalReference =>
+            DomainInternalInheritanceEdge(from, to)
+          // domain-internal -> domain-external
+          case ref: ProjectInternalInheritance =>
             val from = Node.genId(definition)
             val toLabel = s"${ref.definition.pkg}.${ref.definition.name}"
-            val toPkg = ref.definition.pkg
-            val arrowHead = ref match {
-              case _: InternalInheritance => Normal
-              case _: InternalProperty    => Diamond
-            }
-            DomainExternalEdge(from, toLabel, toPkg, arrowHead)
+            DomainExternalInheritanceEdge(from, toLabel)
+          // domain-internal -o domain-internal
+          case ref: ProjectInternalProperty if ref.definition.isInAnyPackage(domainPackages) =>
+            val from = Node.genId(definition)
+            val to = Node.genId(ref.definition)
+            val propertyLabel = ref.memberName
+            DomainInternalPropertyEdge(from, propertyLabel, to)
+          // domain-internal -o domain-external
+          case ref: ProjectInternalProperty =>
+            val from = Node.genId(definition)
+            val propertyLabel = ref.memberName
+            val toLabel = s"${ref.definition.pkg}.${ref.definition.name}"
+            DomainExternalPropertyEdge(from, propertyLabel, toLabel)
         }
       }
 
@@ -70,13 +72,21 @@ object DomainRelationDiagramDocument {
 
   case class Digraph(label: String, subGraphs: Seq[SubGraph], edges: Seq[Edge])
   case class SubGraph(id: SubGraphId, label: String, nodes: Seq[Node])
-  sealed trait Edge
+  sealed trait Edge {
+    def from: NodeId
+  }
 
-  /** edge of domain-internal */
-  case class DomainInternalEdge(from: NodeId, to: NodeId, arrowHead: ArrowType) extends Edge
+  /** edge of domain-internal inheritance */
+  case class DomainInternalInheritanceEdge(from: NodeId, to: NodeId) extends Edge
 
-  /** edge bounds to outside of domain */
-  case class DomainExternalEdge(from: NodeId, toLabel: String, toPkg: Package, arrowHead: ArrowType) extends Edge
+  /** edge of inheritance of outside of domain */
+  case class DomainExternalInheritanceEdge(from: NodeId, toLabel: String) extends Edge
+
+  /** edge of domain-internal property */
+  case class DomainInternalPropertyEdge(from: NodeId, propertyLabel: String, to: NodeId) extends Edge
+
+  /** edge of property of outside of domain */
+  case class DomainExternalPropertyEdge(from: NodeId, propertyLabel: String, toLabel: String) extends Edge
 
   case class Node(id: NodeId, name: String, alias: Option[String]) {
     def label: String = alias.map(a => s"$name\n&quot;$a&quot;").getOrElse(name)
@@ -109,10 +119,4 @@ object DomainRelationDiagramDocument {
   case class NodeId(value: String) extends AnyVal {
     override def toString: String = value
   }
-
-  sealed abstract class ArrowType(val code: String) {
-    override def toString: String = code
-  }
-  case object Normal extends ArrowType("normal")
-  case object Diamond extends ArrowType("odiamond")
 }
