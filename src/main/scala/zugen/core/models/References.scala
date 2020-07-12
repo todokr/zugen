@@ -10,22 +10,25 @@ object References {
 
   sealed trait Reference
 
-  sealed trait InternalReference extends Reference {
+  sealed trait ProjectInternalReference extends Reference {
     def definition: DefinitionBlock
   }
 
-  object InternalReference {
-    final case class InternalInheritance(definition: DefinitionBlock) extends InternalReference
-    final case class InternalProperty(definition: DefinitionBlock) extends InternalReference
+  object ProjectInternalReference {
+    final case class ProjectInternalInheritance(definition: DefinitionBlock) extends ProjectInternalReference
+    final case class ProjectInternalProperty(
+      memberName: String,
+      definition: DefinitionBlock
+    ) extends ProjectInternalReference
   }
 
-  sealed trait ExternalReference extends Reference {
+  sealed trait ProjectExternalReference extends Reference {
     def pkg: Package
     def typeName: String
   }
 
-  object ExternalReference {
-    final case class ExternalInheritance(pkg: Package, typeName: String) extends ExternalReference
-    final case class ExternalProperty(pkg: Package, typeName: String) extends ExternalReference
+  object ProjectExternalReference {
+    final case class ProjectExternalInheritance(pkg: Package, typeName: String) extends ProjectExternalReference
+    final case class ProjectExternalProperty(pkg: Package, typeName: String) extends ProjectExternalReference
   }
 }

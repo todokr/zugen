@@ -1,20 +1,14 @@
 @import zugen.core.document.DomainRelationDiagramDocument.Digraph
-@import zugen.core.document.DomainRelationDiagramDocument.{DomainInternalEdge, DomainExternalEdge}
+@import zugen.core.document.DomainRelationDiagramDocument._
 
 @(digraph: Digraph)
 digraph domain_relation_diagram {
   graph [
-    charset = "UTF-8";
+    charset = "UTF-8",
     bgcolor = "#343434",
     fontcolor = "#eeeeee",
     style = "filled",
-    rankdir = TB,
-    margin = 0.2,
-    nodesep = 0.5,
-    ranksep = 0.8,
-    compound = true,
-    layout = dot,
-    pad = 0.1
+    layout = dot
   ];
 
   node [
@@ -30,20 +24,22 @@ digraph domain_relation_diagram {
 
   edge [
     style = solid,
-    fontsize = 10,
-    color = "#cccccc",
-    labelfloat = false
+    fontsize = 8,
+    color = "#eeeeee",
+    fontname = "sans-serif",
+    fontcolor = "#dddddd",
+    labelfloat = false,
   ];
 
   @for(subGraph <- digraph.subGraphs) {
     subgraph cluster_@{subGraph.id} {
       label = "  @subGraph.label  ";
       style = "";
-      color = "#eeeeee";
+      color = "#555555";
       fontname = "sans-serif";
-      fontsize = 10;
-      margin = 1;
-      pad = 1;
+      fontsize = 8;
+      margin = 10;
+      pad = 10;
 
       @for(node <- subGraph.nodes) {
         @node.id [label = "@node.label"]
@@ -53,8 +49,10 @@ digraph domain_relation_diagram {
 
   @for(edge <- digraph.edges) {
     @edge match {
-      case DomainInternalEdge(from, to, arrowHead) => { @from -> @to [arrowhead = @arrowHead] }
-      case DomainExternalEdge(from, toLabel, _, arrowHead) => { @from -> "@toLabel" [ color = "#880000", arrowhead = @arrowHead] }
+      case DomainInternalInheritanceEdge(from, to) => { @from -> @to [arrowhead = normal ] }
+      case DomainExternalInheritanceEdge(from, to) => { @from -> @to [arrowhead = normal, color = "#880000" ] }
+      case DomainInternalPropertyEdge(from, propertyLabel, toLabel) => { @from -> "@toLabel" [ arrowhead = odiamond, label = @propertyLabel ] }
+      case DomainExternalPropertyEdge(from, propertyLabel, toLabel) => { @from -> "@toLabel" [ arrowhead = odiamond, label = @propertyLabel, color = "#880000" ] }
     }
   }
 }
