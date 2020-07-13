@@ -31,7 +31,7 @@ trait SemanticDBTemplateExtractor {
           }.sortBy(_.startLine)
 
         packages.flatMap { p =>
-          val pkg = Packages(p.ref.toString)
+          val pkg = Package(p.ref.toString)
           p.stats.collect {
             case c: Defn.Class =>
               val constructor =
@@ -104,7 +104,7 @@ trait SemanticDBTemplateExtractor {
             println(
               s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for parent not found: typeName = ${typeName},  ${init.pos.startLine}:${init.pos.endLine} ${init.pos.startColumn}~${init.pos.endColumn}"
             )
-            Packages.unknown
+            Package.unknown
         }
 
         val tpe = ParentType(typeName, typeArgs, pkg)
@@ -144,7 +144,7 @@ trait SemanticDBTemplateExtractor {
               s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs
                 .mkString(",")}, ${param.pos.startLine}:${param.pos.endLine} ${param.pos.startColumn}~${param.pos.endColumn}"
             )
-            Packages.unknown
+            Package.unknown
         }
 
         ConstructorArgument(
@@ -175,6 +175,6 @@ trait SemanticDBTemplateExtractor {
     symbol: String
   ) {
 
-    val pkg: Packages = Packages(symbol.split("/").toIndexedSeq.init.map(Package))
+    val pkg: Package = Package(symbol.split("/").toIndexedSeq.init.map(QualId))
   }
 }

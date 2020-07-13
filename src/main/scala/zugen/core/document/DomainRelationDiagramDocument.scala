@@ -4,7 +4,7 @@ import scala.util.chaining._
 
 import zugen.core.config.Config
 import zugen.core.document.DomainRelationDiagramDocument.Digraph
-import zugen.core.models.{DocumentMaterials, Packages, Scaladoc, Template}
+import zugen.core.models.{DocumentMaterials, Package, Scaladoc, Template}
 import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInheritance, ProjectInternalProperty}
 
 /** domain object relation diagram */
@@ -17,7 +17,7 @@ final case class DomainRelationDiagramDocument(digraph: Digraph) extends Documen
 object DomainRelationDiagramDocument {
 
   def of(documentMaterial: DocumentMaterials, config: Config): DomainRelationDiagramDocument = {
-    val domainPackages = config.domainPackages.map(n => Packages(n.value))
+    val domainPackages = config.domainPackages.map(n => Package(n.value))
     val domainInternalElements = documentMaterial.elms
       .filter(_.template.isInAnyPackage(domainPackages))
       .filterNot(elm => config.domainObjectExcludePatterns.exists(p => elm.template.name.value.matches(p)))
@@ -92,14 +92,14 @@ object DomainRelationDiagramDocument {
 
   object SubGraph {
 
-    def genId(pkg: Packages): SubGraphId =
-      SubGraphId(s"${pkg.elms.map(_.value).mkString("_")}")
+    def genId(pkg: Package): SubGraphId =
+      SubGraphId(s"${pkg.ids.map(_.value).mkString("_")}")
   }
 
   object Node {
 
     def genId(definitionBlock: Template): NodeId =
-      NodeId(s"${definitionBlock.pkg.elms.map(_.value).mkString("_")}_${definitionBlock.name.value}")
+      NodeId(s"${definitionBlock.pkg.ids.map(_.value).mkString("_")}_${definitionBlock.name.value}")
 
     def apply(definitionBlock: Template, scaladoc: Option[Scaladoc]): Node = {
       Node(

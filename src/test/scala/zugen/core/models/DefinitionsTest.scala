@@ -11,13 +11,13 @@ class DefinitionsTest extends AnyFunSuite {
       name = TemplateName("SomeTrait"),
       modifier = Modifiers(Seq.empty),
       parents = Parents(Seq.empty),
-      pkg = Packages("example.domain.model"),
+      pkg = Package("example.domain.model"),
       fileName = FileName("SomeTrait"),
       startLine = 0,
       endLine = 10
     )
 
-    val targetPackages = Seq("example.domain", "example.domain2").map(Packages)
+    val targetPackages = Seq("example.domain", "example.domain2").map(Package)
 
     assert(block.isInAnyPackage(targetPackages))
   }

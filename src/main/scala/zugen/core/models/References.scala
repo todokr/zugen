@@ -22,12 +22,12 @@ object References {
   }
 
   sealed trait ProjectExternalReference extends Reference {
-    def pkg: Packages
+    def pkg: Package
     def typeName: String
   }
 
   object ProjectExternalReference {
-    final case class ProjectExternalInheritance(pkg: Packages, typeName: String) extends ProjectExternalReference
-    final case class ProjectExternalProperty(pkg: Packages, typeName: String) extends ProjectExternalReference
+    final case class ProjectExternalInheritance(pkg: Package, typeName: String) extends ProjectExternalReference
+    final case class ProjectExternalProperty(pkg: Package, typeName: String) extends ProjectExternalReference
   }
 }

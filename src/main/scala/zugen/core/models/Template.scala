@@ -9,7 +9,7 @@ import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInh
   * see: https://scala-lang.org/files/archive/spec/2.13/05-classes-and-objects.html
   */
 sealed trait Template {
-  val pkg: Packages
+  val pkg: Package
   val name: TemplateName
   val modifier: Modifiers
   val parents: Parents
@@ -29,13 +29,13 @@ sealed trait Template {
         case (None, tpe)      => ProjectExternalInheritance(tpe.pkg, tpe.typeName)
       }.pipe(References(_))
 
-  def isInAnyPackage(targets: Seq[Packages]): Boolean = targets.exists(pkg.isInPackage)
+  def isInAnyPackage(targets: Seq[Package]): Boolean = targets.exists(pkg.isInPackage)
 }
 
 object Template {
 
   case class ClassTemplate(
-    pkg: Packages,
+    pkg: Package,
     name: TemplateName,
     modifier: Modifiers,
     parents: Parents,
@@ -62,7 +62,7 @@ object Template {
   }
 
   case class TraitTemplate(
-    pkg: Packages,
+    pkg: Package,
     name: TemplateName,
     modifier: Modifiers,
     parents: Parents,
@@ -72,7 +72,7 @@ object Template {
   ) extends Template
 
   case class ObjectTemplate(
-    pkg: Packages,
+    pkg: Package,
     name: TemplateName,
     modifier: Modifiers,
     parents: Parents,
