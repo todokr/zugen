@@ -7,12 +7,9 @@ import scala.meta.internal.semanticdb
 import scala.util.chaining._
 
 import zugen.core.config.Config
-import zugen.core.models.{DocumentMaterial, DocumentMaterials, Scaladocs, Templates}
+import zugen.core.models.{DocumentMaterial, DocumentMaterials}
 
-object SemanticDBMaterialLoader
-    extends MaterialLoader
-    with SemanticDBTemplateExtractor
-    with SemanticDBScaladocExtractor {
+object SemanticDBMaterialLoader extends MaterialLoader with SemanticDBTemplateExtractor {
 
   def load(config: Config): DocumentMaterials = {
     val semanticdbRoot = config.classesPath.value.resolve("META-INF/semanticdb")
@@ -29,23 +26,18 @@ object SemanticDBMaterialLoader
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
 
-    val definitions = extractTemplates(documents)
-    val scaladocs = extractScaladocs(documents)
-    merge(definitions, scaladocs)
-  }
-
-  class SemanticdbDirectoryNotExistException(msg: String) extends Exception(msg)
-
-  private def merge(templates: Templates, scaladocs: Scaladocs): DocumentMaterials =
-    templates.elms
+    val templateDefinitions = extractTemplates(documents)
+    templateDefinitions.elms
       .map { template =>
-        val references = template.resolveReferences(templates)
+        val references = template.resolveReferences(templateDefinitions)
         DocumentMaterial(
-          template = template,
-          scaladoc = scaladocs.findDocForDefinition(template),
+          templateDefinition = template,
           references = references
         )
       }.pipe(DocumentMaterials)
+  }
+
+  class SemanticdbDirectoryNotExistException(msg: String) extends Exception(msg)
 
   private def errorMsg(semanticdbRoot: Path): String =
     s"""

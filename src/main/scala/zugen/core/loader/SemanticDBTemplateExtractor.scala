@@ -1,45 +1,67 @@
 package zugen.core.loader
 
-import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
-import scala.meta.{Template => _, _}
+import scala.meta._
+import scala.meta.contrib.{DocToken, ScaladocParser}
+import scala.meta.internal.semanticdb.SymbolOccurrence.Role
+import scala.meta.internal.semanticdb.{Range, SymbolOccurrence, TextDocument}
 import scala.util.chaining._
 
+import zugen.core.loader.ReferredSymbol.InvokedSymbol
 import zugen.core.models.Modifier.AccessibilityModifier
-import zugen.core.models.Template.{ClassTemplate, ObjectTemplate, TraitTemplate}
+import zugen.core.models.TemplateDefinition.{ClassDefinition, ObjectDefinition, TraitDefinition}
 import zugen.core.models._
 
 trait SemanticDBTemplateExtractor {
 
   /** Extract templates from TextDocuments of SemanticDB */
-  def extractTemplates(docs: Seq[TextDocument]): Templates =
+  def extractTemplates(docs: Seq[TextDocument]): TemplateDefinitions =
     docs
       .flatMap { doc =>
+        println(s"${doc.uri} -----------------------------------------")
         val source = doc.text.parse[Source].get
         val packages = source.collect { case p: Pkg => p }
         val fileName = FileName(doc.uri)
 
         val referredFQCNs = doc.occurrences
           .collect {
-            case SymbolOccurrence(Some(range), symbol, _) =>
-              ReferredFQCN(
-                startLine = range.startLine,
-                endLine = range.endLine,
-                startColumn = range.startCharacter,
-                endColumn = range.endCharacter,
-                symbol = symbol
-              )
-          }.sortBy(_.startLine)
+            case SymbolOccurrence(Some(range), symbol, Role.REFERENCE) => ReferredSymbol.of(symbol, range)
+          }
+
+        val scaladocs = {
+          val tokens =
+            doc.text.tokenize.getOrElse(throw new Exception(s"failed to tokenize code: ${doc.uri}"))
+          val fileName = FileName(doc.uri)
+          val comments = tokens.collect { case c: Token.Comment => c }
+          comments.flatMap { comment =>
+            ScaladocParser
+              .parseScaladoc(comment)
+              .getOrElse(Seq.empty)
+              .collect {
+                case DocToken(_, _, Some(body)) =>
+                  Scaladoc(
+                    fileName = fileName,
+                    startLine = comment.pos.startLine,
+                    endLine = comment.pos.endLine,
+                    content = body
+                  )
+              }
+          }
+        }.pipe(Scaladocs)
 
         packages.flatMap { p =>
           val pkg = Package(p.ref.toString)
           p.stats.collect {
             case c: Defn.Class =>
+              val definitionName = TemplateDefinitionName(c.name.toString)
+              val scaladoc = scaladocs.findByLineNum(c.pos.startLine)
               val constructor =
                 resolveConstructor(c.ctor.paramss.flatten, referredFQCNs)
-              val parents = resolveParents(c.templ.inits, referredFQCNs)
 
-              ClassTemplate(
-                name = TemplateName(c.name.toString),
+              val parents = resolveParents(c.templ.inits, referredFQCNs)
+              resolveInvocations(pkg, definitionName, c.templ, referredFQCNs).foreach(println)
+
+              ClassDefinition(
+                name = definitionName,
                 modifier = c.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
@@ -47,44 +69,59 @@ trait SemanticDBTemplateExtractor {
                 parents = parents,
                 pkg = pkg,
                 constructor = constructor,
+                methods = Seq.empty,
                 fileName = fileName,
+                scaladoc = scaladoc,
                 startLine = c.pos.startLine,
                 endLine = c.pos.endLine
               )
             case t: Defn.Trait =>
+              val definitionName = TemplateDefinitionName(t.name.toString)
+              val scaladoc = scaladocs.findByLineNum(t.pos.startLine)
               val parents = resolveParents(t.templ.inits, referredFQCNs)
 
-              TraitTemplate(
-                name = TemplateName(t.name.toString),
+              resolveInvocations(pkg, definitionName, t.templ, referredFQCNs).foreach(println)
+
+              TraitDefinition(
+                name = definitionName,
                 modifier = t.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
                   .pipe(Modifiers(_)),
                 parents = parents,
                 pkg = pkg,
+                methods = Seq.empty,
                 fileName = fileName,
+                scaladoc = scaladoc,
                 startLine = t.pos.startLine,
                 endLine = t.pos.endLine
               )
             case o: Defn.Object =>
+              val definitionName = TemplateDefinitionName(o.name.toString)
+              val scaladoc = scaladocs.findByLineNum(o.pos.startLine)
               val parents = resolveParents(o.templ.inits, referredFQCNs)
-              ObjectTemplate(
-                name = TemplateName(o.name.toString),
+
+              resolveInvocations(pkg, definitionName, o.templ, referredFQCNs).foreach(println)
+
+              ObjectDefinition(
+                name = TemplateDefinitionName(o.name.toString),
                 modifier = o.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
                   .pipe(Modifiers(_)),
                 parents = parents,
                 pkg = pkg,
+                methods = Seq.empty,
                 fileName = fileName,
+                scaladoc = scaladoc,
                 startLine = o.pos.startLine,
                 endLine = o.pos.endLine
               )
           }
         }
-      }.pipe(Templates(_))
+      }.pipe(TemplateDefinitions(_))
 
-  private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredFQCN]): Parents =
+  private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredSymbol]): Parents =
     inits
       .map { init =>
         val (typeName, typeArgs) = init.tpe match {
@@ -114,7 +151,7 @@ trait SemanticDBTemplateExtractor {
 
   private def resolveConstructor(
     params: Seq[Term.Param],
-    referredFQCNs: Seq[ReferredFQCN]
+    referredFQCNs: Seq[ReferredSymbol]
   ): Constructor =
     params
       .map { param =>
@@ -154,6 +191,34 @@ trait SemanticDBTemplateExtractor {
       }
       .pipe(Constructor)
 
+  def resolveInvocations(
+    pkg: Package,
+    templateDefinitionName: TemplateDefinitionName,
+    template: Template,
+    referredSymbols: Seq[ReferredSymbol]): Seq[Method] = {
+    val methods = template.stats.collect { case d: Defn.Def => d }
+    methods.map { method =>
+      val invokes = method.body.collect {
+        case a: Term.Apply =>
+          val (targetName, pos) = a.fun match {
+            case s: Term.Select  => s.name.value -> s.name.pos
+            case name: Term.Name => name.value -> name.pos
+            case x               => x.toString -> x.pos
+          }
+
+          referredSymbols.collectFirst {
+            case symbol: InvokedSymbol
+                if symbol.startLine == pos.startLine &&
+                  symbol.endLine == pos.endLine &&
+                  symbol.startColumn == pos.startColumn &&
+                  symbol.endColumn == pos.endColumn =>
+              Invoke(symbol.pkg, symbol.templateDefinitionName, MethodName(targetName))
+          }
+      }.collect { case Some(x) => x }
+      Method(pkg, templateDefinitionName, MethodName(method.name.toString), invokes)
+    }
+  }
+
   private def toModElm(mod: Mod): Option[Modifier] =
     mod match {
       case _: Mod.Case                     => Some(Modifier.Case)
@@ -166,15 +231,58 @@ trait SemanticDBTemplateExtractor {
       case _                               => None
     }
 
-  /** Fully Qualified Class Names of symbol occurred in source code */
-  case class ReferredFQCN(
+}
+
+/** A referred symbol occurred in source code */
+sealed trait ReferredSymbol {
+  val startLine: Int
+  val endLine: Int
+  val startColumn: Int
+  val endColumn: Int
+  val symbol: String
+  val pkg: Package = Package(symbol.split("/").toIndexedSeq.init.map(QualId))
+}
+object ReferredSymbol {
+
+  private val MethodInvocationSuffix = "()."
+
+  def of(symbol: String, range: Range): ReferredSymbol =
+    symbol match {
+      case s if s.endsWith(MethodInvocationSuffix) =>
+        InvokedSymbol(
+          startLine = range.startLine,
+          endLine = range.endLine,
+          startColumn = range.startCharacter,
+          endColumn = range.endCharacter,
+          symbol = symbol
+        )
+      case _ =>
+        PlainSymbol(
+          startLine = range.startLine,
+          endLine = range.endLine,
+          startColumn = range.startCharacter,
+          endColumn = range.endCharacter,
+          symbol = symbol
+        )
+    }
+
+  final case class PlainSymbol(
     startLine: Int,
     endLine: Int,
     startColumn: Int,
     endColumn: Int,
     symbol: String
-  ) {
+  ) extends ReferredSymbol
 
-    val pkg: Package = Package(symbol.split("/").toIndexedSeq.init.map(QualId))
+  final case class InvokedSymbol(
+    startLine: Int,
+    endLine: Int,
+    startColumn: Int,
+    endColumn: Int,
+    symbol: String
+  ) extends ReferredSymbol {
+
+    val templateDefinitionName: TemplateDefinitionName =
+      symbol.split("/").last.split("""[#\\.]""").head.pipe(TemplateDefinitionName)
   }
 }

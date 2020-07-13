@@ -4,8 +4,8 @@ import scala.util.chaining._
 
 import zugen.core.config.Config
 import zugen.core.document.DomainRelationDiagramDocument.Digraph
-import zugen.core.models.{DocumentMaterials, Package, Scaladoc, Template}
 import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInheritance, ProjectInternalProperty}
+import zugen.core.models.{DocumentMaterials, Package, TemplateDefinition}
 
 /** domain object relation diagram */
 final case class DomainRelationDiagramDocument(digraph: Digraph) extends Document {
@@ -19,14 +19,14 @@ object DomainRelationDiagramDocument {
   def of(documentMaterial: DocumentMaterials, config: Config): DomainRelationDiagramDocument = {
     val domainPackages = config.domainPackages.map(n => Package(n.value))
     val domainInternalElements = documentMaterial.elms
-      .filter(_.template.isInAnyPackage(domainPackages))
-      .filterNot(elm => config.domainObjectExcludePatterns.exists(p => elm.template.name.value.matches(p)))
+      .filter(_.templateDefinition.isInAnyPackage(domainPackages))
+      .filterNot(elm => config.domainObjectExcludePatterns.exists(p => elm.templateDefinition.name.value.matches(p)))
 
     val subGraphs = domainInternalElements
-      .groupBy(_.template.pkg)
+      .groupBy(_.templateDefinition.pkg)
       .map {
         case (pkg, materials) =>
-          val nodes = materials.map(m => Node(m.template, m.scaladoc))
+          val nodes = materials.map(m => Node(m.templateDefinition))
           val subGraphId = SubGraph.genId(pkg)
           SubGraph(subGraphId, pkg.toString, nodes)
       }
@@ -34,7 +34,7 @@ object DomainRelationDiagramDocument {
 
     val edges = domainInternalElements
       .flatMap { materialElm =>
-        val template = materialElm.template
+        val template = materialElm.templateDefinition
         materialElm.references.elms.collect {
           // domain-internal -> domain-internal
           case ref: ProjectInternalInheritance if ref.definition.isInAnyPackage(domainPackages) =>
@@ -98,14 +98,14 @@ object DomainRelationDiagramDocument {
 
   object Node {
 
-    def genId(definitionBlock: Template): NodeId =
-      NodeId(s"${definitionBlock.pkg.ids.map(_.value).mkString("_")}_${definitionBlock.name.value}")
+    def genId(templateDefinition: TemplateDefinition): NodeId =
+      NodeId(s"${templateDefinition.pkg.ids.map(_.value).mkString("_")}_${templateDefinition.name.value}")
 
-    def apply(definitionBlock: Template, scaladoc: Option[Scaladoc]): Node = {
+    def apply(templateDefinition: TemplateDefinition): Node = {
       Node(
-        id = genId(definitionBlock),
-        name = definitionBlock.name.value,
-        alias = scaladoc.map(_.firstLine) // alias should be in head of lines
+        id = genId(templateDefinition),
+        name = templateDefinition.name.value,
+        alias = templateDefinition.scaladoc.map(_.firstLine) // alias should be in head of lines
       )
     }
   }

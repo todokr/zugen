@@ -5,20 +5,22 @@ import scala.util.chaining._
 import zugen.core.models.References.ProjectExternalReference.{ProjectExternalInheritance, ProjectExternalProperty}
 import zugen.core.models.References.ProjectInternalReference.{ProjectInternalInheritance, ProjectInternalProperty}
 
-/** Classe, trait and object
+/** Classes, trait and object
   * see: https://scala-lang.org/files/archive/spec/2.13/05-classes-and-objects.html
   */
-sealed trait Template {
+sealed trait TemplateDefinition {
   val pkg: Package
-  val name: TemplateName
+  val name: TemplateDefinitionName
   val modifier: Modifiers
   val parents: Parents
+  val methods: Seq[Method]
   val fileName: FileName
+  val scaladoc: Option[Scaladoc]
   val startLine: Int
   val endLine: Int
 
   /** resolve reference to other definition block */
-  def resolveReferences(from: Templates): References =
+  def resolveReferences(from: TemplateDefinitions): References =
     parents.elms
       .map { parent =>
         val defBlock = from.elms.find(b => b.pkg == parent.tpe.pkg && b.name.value == parent.tpe.typeName)
@@ -32,21 +34,23 @@ sealed trait Template {
   def isInAnyPackage(targets: Seq[Package]): Boolean = targets.exists(pkg.isInPackage)
 }
 
-object Template {
+object TemplateDefinition {
 
-  case class ClassTemplate(
+  case class ClassDefinition(
     pkg: Package,
-    name: TemplateName,
+    name: TemplateDefinitionName,
     modifier: Modifiers,
     parents: Parents,
     constructor: Constructor,
+    methods: Seq[Method],
     fileName: FileName,
+    scaladoc: Option[Scaladoc],
     startLine: Int,
     endLine: Int
-  ) extends Template {
+  ) extends TemplateDefinition {
 
     /** In addition to inheritances, props of constructors have to be resolved for class template */
-    override def resolveReferences(from: Templates): References = {
+    override def resolveReferences(from: TemplateDefinitions): References = {
       val inheritances = super.resolveReferences(from)
       val properties = constructor.args
         .map { arg =>
@@ -61,23 +65,27 @@ object Template {
     }
   }
 
-  case class TraitTemplate(
+  case class TraitDefinition(
     pkg: Package,
-    name: TemplateName,
+    name: TemplateDefinitionName,
     modifier: Modifiers,
     parents: Parents,
+    methods: Seq[Method],
     fileName: FileName,
+    scaladoc: Option[Scaladoc],
     startLine: Int,
     endLine: Int
-  ) extends Template
+  ) extends TemplateDefinition
 
-  case class ObjectTemplate(
+  case class ObjectDefinition(
     pkg: Package,
-    name: TemplateName,
+    name: TemplateDefinitionName,
     modifier: Modifiers,
     parents: Parents,
+    methods: Seq[Method],
     fileName: FileName,
+    scaladoc: Option[Scaladoc],
     startLine: Int,
     endLine: Int
-  ) extends Template
+  ) extends TemplateDefinition
 }

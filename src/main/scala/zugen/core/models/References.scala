@@ -10,14 +10,14 @@ object References {
   sealed trait Reference
 
   sealed trait ProjectInternalReference extends Reference {
-    def definition: Template
+    def definition: TemplateDefinition
   }
 
   object ProjectInternalReference {
-    final case class ProjectInternalInheritance(definition: Template) extends ProjectInternalReference
+    final case class ProjectInternalInheritance(definition: TemplateDefinition) extends ProjectInternalReference
     final case class ProjectInternalProperty(
       memberName: String,
-      definition: Template
+      definition: TemplateDefinition
     ) extends ProjectInternalReference
   }
 

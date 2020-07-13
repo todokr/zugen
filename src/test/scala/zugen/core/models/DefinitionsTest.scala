@@ -1,14 +1,14 @@
 package zugen.core.models
 
 import org.scalatest.funsuite.AnyFunSuite
-import zugen.core.models.Template.TraitTemplate
+import zugen.core.models.TemplateDefinition.TraitDefinition
 
 class DefinitionsTest extends AnyFunSuite {
 
   test("isInAnyPackages") {
 
     val block = TraitTemplate(
-      name = TemplateName("SomeTrait"),
+      name = TemplateDefinitionName("SomeTrait"),
       modifier = Modifiers(Seq.empty),
       parents = Parents(Seq.empty),
       pkg = Package("example.domain.model"),

@@ -2,7 +2,7 @@ package zugen.core.document
 
 import org.scalatest.funsuite.AnyFunSuite
 import zugen.core.document.InvocationTree.{InvocationBranch, InvocationLeaf, TooDeepMethodInvocationException}
-import zugen.core.models.{Method, MethodInvocation, MethodName, Package, QualId, TemplateName}
+import zugen.core.models.{Method, MethodInvocation, MethodName, Package, QualId, TemplateDefinitionName}
 
 class InvocationTreeTest extends AnyFunSuite {
 
@@ -11,7 +11,7 @@ class InvocationTreeTest extends AnyFunSuite {
     def method(x: String): Method =
       Method(
         pkg = Package(Seq(QualId(s"package${x.toLowerCase}"))),
-        templateName = TemplateName(s"Class$x"),
+        templateDefinitionName = TemplateDefinitionName(s"Class$x"),
         methodName = MethodName(x)
       )
 
@@ -96,8 +96,8 @@ class InvocationTreeTest extends AnyFunSuite {
   test("limit exceed") {
     val invocations = Iterator.from(1).sliding(2).map {
       case Seq(a, b) =>
-        val methodA = Method(Package(Seq(QualId(s"$a"))), TemplateName(s"$a"), MethodName(s"$a"))
-        val methodB = Method(Package(Seq(QualId(s"$b"))), TemplateName(s"$b"), MethodName(s"$b"))
+        val methodA = Method(Package(Seq(QualId(s"$a"))), TemplateDefinitionName(s"$a"), MethodName(s"$a"))
+        val methodB = Method(Package(Seq(QualId(s"$b"))), TemplateDefinitionName(s"$b"), MethodName(s"$b"))
         MethodInvocation(methodA, methodB)
     }.take(200).toSeq
 

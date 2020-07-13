@@ -4,7 +4,7 @@ import scala.util.chaining._
 
 import zugen.core.config.Config
 import zugen.core.document.DomainObjectTableDocument.DomainObjectTableRow
-import zugen.core.models.{DocumentMaterials, FileName, Package, TemplateName}
+import zugen.core.models.{DocumentMaterials, FileName, Package, TemplateDefinitionName}
 
 /** domain object table */
 final case class DomainObjectTableDocument(rows: Seq[DomainObjectTableRow]) extends Document {
@@ -18,19 +18,19 @@ object DomainObjectTableDocument {
   def of(documentmaterials: DocumentMaterials, config: Config): DomainObjectTableDocument = {
     val domainPackages = config.domainPackages.map(n => Package(n.value))
     documentmaterials.elms.collect {
-      case elm if elm.template.isInAnyPackage(domainPackages) =>
+      case elm if elm.templateDefinition.isInAnyPackage(domainPackages) =>
         DomainObjectTableRow(
-          pkg = elm.template.pkg,
-          name = elm.template.name,
-          scaladoc = elm.scaladoc.map(_.content).getOrElse(""),
-          fileName = elm.template.fileName
+          pkg = elm.templateDefinition.pkg,
+          name = elm.templateDefinition.name,
+          scaladoc = elm.templateDefinition.scaladoc.map(_.content).getOrElse(""),
+          fileName = elm.templateDefinition.fileName
         )
     }.pipe(DomainObjectTableDocument(_))
   }
 
   final case class DomainObjectTableRow(
     pkg: Package,
-    name: TemplateName,
+    name: TemplateDefinitionName,
     scaladoc: String,
     fileName: FileName
   )

@@ -5,10 +5,4 @@ final case class MethodInvocation(
   target: Method
 )
 
-final case class Method(
-  pkg: Package,
-  templateName: TemplateName,
-  methodName: MethodName
-)
-
-case class MethodName(value: String) extends AnyVal
+final case class MethodInvocations(elms: Seq[MethodInvocation])
