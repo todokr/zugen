@@ -5,10 +5,9 @@ import scala.meta.contrib.{DocToken, ScaladocParser}
 import scala.meta.internal.semanticdb.TextDocument
 import scala.util.chaining._
 
-import zugen.core.models.Scaladocs.ScaladocBlock
-import zugen.core.models.{FileName, Scaladocs}
+import zugen.core.models.{FileName, Scaladoc, Scaladocs}
 
-trait ScaladocExtractor {
+trait SemanticDBScaladocExtractor {
 
   /** extract scaladoc from SemanticDB TextDocument */
   def extractScaladocs(docs: Seq[TextDocument]): Scaladocs =
@@ -23,7 +22,7 @@ trait ScaladocExtractor {
           .getOrElse(Seq.empty)
           .collect {
             case DocToken(_, _, Some(body)) =>
-              ScaladocBlock(
+              Scaladoc(
                 fileName = fileName,
                 startLine = comment.pos.startLine,
                 endLine = comment.pos.endLine,
@@ -31,6 +30,6 @@ trait ScaladocExtractor {
               )
           }
       }
-    }.pipe(Scaladocs(_))
+    }.pipe(Scaladocs)
 
 }

@@ -1,6 +1,5 @@
 package zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
 import zugen.core.models.References.Reference
 
 /** references that class etc. refers */
@@ -11,24 +10,24 @@ object References {
   sealed trait Reference
 
   sealed trait ProjectInternalReference extends Reference {
-    def definition: DefinitionBlock
+    def definition: Template
   }
 
   object ProjectInternalReference {
-    final case class ProjectInternalInheritance(definition: DefinitionBlock) extends ProjectInternalReference
+    final case class ProjectInternalInheritance(definition: Template) extends ProjectInternalReference
     final case class ProjectInternalProperty(
       memberName: String,
-      definition: DefinitionBlock
+      definition: Template
     ) extends ProjectInternalReference
   }
 
   sealed trait ProjectExternalReference extends Reference {
-    def pkg: Package
+    def pkg: Packages
     def typeName: String
   }
 
   object ProjectExternalReference {
-    final case class ProjectExternalInheritance(pkg: Package, typeName: String) extends ProjectExternalReference
-    final case class ProjectExternalProperty(pkg: Package, typeName: String) extends ProjectExternalReference
+    final case class ProjectExternalInheritance(pkg: Packages, typeName: String) extends ProjectExternalReference
+    final case class ProjectExternalProperty(pkg: Packages, typeName: String) extends ProjectExternalReference
   }
 }

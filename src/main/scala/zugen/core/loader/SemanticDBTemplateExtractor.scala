@@ -1,21 +1,17 @@
 package zugen.core.loader
 
-import scala.meta._
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
+import scala.meta.{Template => _, _}
 import scala.util.chaining._
 
-import zugen.core.models.Constructor.{Argument, ArgumentName}
-import zugen.core.models.Definitions.DefinitionBlock.{ClassDefinitionBlock, ObjectDefinitionBlock, TraitDefinitionBlock}
-import zugen.core.models.Modifiers.AccessibilityModifierElement.{Private, Protected}
-import zugen.core.models.Modifiers.{AccessibilityModifierElement, ModifierElement}
-import zugen.core.models.Package.PackageElement
-import zugen.core.models.Parents.Parent
-import zugen.core.models.{Constructor, DefinitionName, Definitions, FileName, Modifiers, Package, Parents}
+import zugen.core.models.Modifier.AccessibilityModifier
+import zugen.core.models.Template.{ClassTemplate, ObjectTemplate, TraitTemplate}
+import zugen.core.models._
 
-trait DefinitionExtractor {
+trait SemanticDBTemplateExtractor {
 
-  /** extract definition block of class etc. */
-  def extractDefinitions(docs: Seq[TextDocument]): Definitions =
+  /** Extract templates from TextDocuments of SemanticDB */
+  def extractTemplates(docs: Seq[TextDocument]): Templates =
     docs
       .flatMap { doc =>
         val source = doc.text.parse[Source].get
@@ -30,20 +26,20 @@ trait DefinitionExtractor {
                 endLine = range.endLine,
                 startColumn = range.startCharacter,
                 endColumn = range.endCharacter,
-                fqcn = symbol.init // TODO hack
+                symbol = symbol
               )
           }.sortBy(_.startLine)
 
         packages.flatMap { p =>
-          val pkg = Package(p.ref.toString)
+          val pkg = Packages(p.ref.toString)
           p.stats.collect {
             case c: Defn.Class =>
               val constructor =
                 resolveConstructor(c.ctor.paramss.flatten, referredFQCNs)
               val parents = resolveParents(c.templ.inits, referredFQCNs)
 
-              ClassDefinitionBlock(
-                name = DefinitionName(c.name.toString),
+              ClassTemplate(
+                name = TemplateName(c.name.toString),
                 modifier = c.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
@@ -58,8 +54,8 @@ trait DefinitionExtractor {
             case t: Defn.Trait =>
               val parents = resolveParents(t.templ.inits, referredFQCNs)
 
-              TraitDefinitionBlock(
-                name = DefinitionName(t.name.toString),
+              TraitTemplate(
+                name = TemplateName(t.name.toString),
                 modifier = t.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
@@ -72,8 +68,8 @@ trait DefinitionExtractor {
               )
             case o: Defn.Object =>
               val parents = resolveParents(o.templ.inits, referredFQCNs)
-              ObjectDefinitionBlock(
-                name = DefinitionName(o.name.toString),
+              ObjectTemplate(
+                name = TemplateName(o.name.toString),
                 modifier = o.mods
                   .map(toModElm)
                   .collect { case Some(mod) => mod }
@@ -86,8 +82,7 @@ trait DefinitionExtractor {
               )
           }
         }
-      }
-      .pipe(Definitions(_))
+      }.pipe(Templates(_))
 
   private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredFQCN]): Parents =
     inits
@@ -109,13 +104,13 @@ trait DefinitionExtractor {
             println(
               s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for parent not found: typeName = ${typeName},  ${init.pos.startLine}:${init.pos.endLine} ${init.pos.startColumn}~${init.pos.endColumn}"
             )
-            Package.unknown
+            Packages.unknown
         }
 
-        val tpe = Parent.ParentType(typeName, typeArgs, pkg)
+        val tpe = ParentType(typeName, typeArgs, pkg)
         Parent(tpe)
       }
-      .pipe(Parents(_))
+      .pipe(Parents)
 
   private def resolveConstructor(
     params: Seq[Term.Param],
@@ -149,28 +144,26 @@ trait DefinitionExtractor {
               s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs
                 .mkString(",")}, ${param.pos.startLine}:${param.pos.endLine} ${param.pos.startColumn}~${param.pos.endColumn}"
             )
-            Package.unknown
+            Packages.unknown
         }
 
-        Argument(
-          ArgumentName(param.name.toString),
-          Constructor.ArgumentType(typeName, typeArgs, pkg)
+        ConstructorArgument(
+          ConstructorArgumentName(param.name.toString),
+          ConstructorArgumentType(typeName, typeArgs, pkg)
         )
       }
-      .pipe(Constructor(_))
+      .pipe(Constructor)
 
-  private def toModElm(mod: Mod): Option[ModifierElement] =
+  private def toModElm(mod: Mod): Option[Modifier] =
     mod match {
-      case _: Mod.Case                     => Some(ModifierElement.Case)
-      case _: Mod.Sealed                   => Some(ModifierElement.Sealed)
-      case _: Mod.Final                    => Some(ModifierElement.Final)
-      case Mod.Private(Name.Anonymous())   => Some(Private)
-      case Mod.Protected(Name.Anonymous()) => Some(Protected)
-      case Mod.Private(ref) =>
-        Some(AccessibilityModifierElement.PackagePrivate(ref.toString))
-      case Mod.Protected(ref) =>
-        Some(AccessibilityModifierElement.PackageProtected(ref.toString))
-      case _ => None
+      case _: Mod.Case                     => Some(Modifier.Case)
+      case _: Mod.Sealed                   => Some(Modifier.Sealed)
+      case _: Mod.Final                    => Some(Modifier.Final)
+      case Mod.Private(Name.Anonymous())   => Some(AccessibilityModifier.Private)
+      case Mod.Protected(Name.Anonymous()) => Some(AccessibilityModifier.Protected)
+      case Mod.Private(ref)                => Some(AccessibilityModifier.PackagePrivate(ref.toString))
+      case Mod.Protected(ref)              => Some(AccessibilityModifier.PackageProtected(ref.toString))
+      case _                               => None
     }
 
   /** Fully Qualified Class Names of symbol occurred in source code */
@@ -179,12 +172,9 @@ trait DefinitionExtractor {
     endLine: Int,
     startColumn: Int,
     endColumn: Int,
-    fqcn: String
+    symbol: String
   ) {
 
-    val typeName: String = fqcn.split("/").last
-    val pkg: Package = Package(
-      fqcn.split("/").toIndexedSeq.init.map(PackageElement)
-    )
+    val pkg: Packages = Packages(symbol.split("/").toIndexedSeq.init.map(Package))
   }
 }

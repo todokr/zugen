@@ -1,24 +1,13 @@
 package zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
-import zugen.core.models.Scaladocs.ScaladocBlock
-
-/** scaladocs in a source code file */
-case class Scaladocs(blocks: Seq[ScaladocBlock]) {
+/** Scaladocs in a source code file */
+case class Scaladocs(blocks: Seq[Scaladoc]) {
 
   /** find scaladoc connected to given definition block */
-  def findDocForDefinition(definition: DefinitionBlock): Option[ScaladocBlock] =
+  def findDocForDefinition(definition: Template): Option[Scaladoc] =
     blocks.find { block =>
       // 同じファイルに記述された、定義部の開始行の直前で終わるScaladocを、定義部に対するScaladocとみなす
       block.fileName == definition.fileName &&
       block.endLine == definition.startLine - 1
     }
-}
-
-object Scaladocs {
-
-  case class ScaladocBlock(fileName: FileName, startLine: Int, endLine: Int, content: String) {
-
-    def firstLine: String = content.split("\n").head
-  }
 }
