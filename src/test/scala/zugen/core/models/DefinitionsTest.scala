@@ -1,7 +1,7 @@
 package zugen.core.models
 
 import org.scalatest.funsuite.AnyFunSuite
-import zugen.core.models.Templates.Template.TraitTemplate
+import zugen.core.models.Template.TraitTemplate
 
 class DefinitionsTest extends AnyFunSuite {
 
