@@ -26,7 +26,7 @@ object SemanticDBMaterialLoader extends MaterialLoader with SemanticDBTemplateEx
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
 
-    val templateDefinitions = extractTemplates(documents)
+    val templateDefinitions = extractTemplateDefinitions(documents)
     templateDefinitions.elms
       .map { template =>
         val references = template.resolveReferences(templateDefinitions)

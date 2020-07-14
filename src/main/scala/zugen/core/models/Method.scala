@@ -4,12 +4,12 @@ final case class Method(
   pkg: Package,
   templateDefinitionName: TemplateDefinitionName,
   methodName: MethodName,
-  invokes: Seq[Invoke] // invocations of other methods in this method
+  invokeTargets: Seq[InvokeTarget] // invocations of other methods in this method
 ) {
 
   override def toString: String =
-    if (invokes.nonEmpty) {
-      s"${pkg}/$templateDefinitionName#$methodName invokes\n" + invokes.map { invoke =>
+    if (invokeTargets.nonEmpty) {
+      s"${pkg}/$templateDefinitionName#$methodName invokes\n" + invokeTargets.map { invoke =>
         s"  -> ${invoke.pkg}/${invoke.templateDefinitionName}#${invoke.methodName}"
       }.mkString("\n")
     } else {
@@ -18,7 +18,7 @@ final case class Method(
 
 }
 
-final case class Invoke(
+final case class InvokeTarget(
   pkg: Package,
   templateDefinitionName: TemplateDefinitionName,
   methodName: MethodName

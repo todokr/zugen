@@ -7,11 +7,13 @@ class DefinitionsTest extends AnyFunSuite {
 
   test("isInAnyPackages") {
 
-    val block = TraitTemplate(
+    val block = TraitDefinition(
+      pkg = Package("example.domain.model"),
       name = TemplateDefinitionName("SomeTrait"),
       modifier = Modifiers(Seq.empty),
       parents = Parents(Seq.empty),
-      pkg = Package("example.domain.model"),
+      methods = Seq.empty,
+      scaladoc = None,
       fileName = FileName("SomeTrait"),
       startLine = 0,
       endLine = 10

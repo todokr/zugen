@@ -1,90 +1,139 @@
 package zugen.core.document
 
 import org.scalatest.funsuite.AnyFunSuite
-import zugen.core.document.InvocationTree.{InvocationBranch, InvocationLeaf, TooDeepMethodInvocationException}
-import zugen.core.models.{Method, MethodInvocation, MethodName, Package, QualId, TemplateDefinitionName}
+import zugen.core.document.MethodInvocationDiagramDocument.InvocationTree
+import zugen.core.document.MethodInvocationDiagramDocument.InvocationTree.{
+  InvocationBranch,
+  InvocationLeaf,
+  TooDeepMethodInvocationException
+}
+import zugen.core.models.{InvokeTarget, Method, MethodName, Package, QualId, TemplateDefinitionName}
 
 class InvocationTreeTest extends AnyFunSuite {
 
   test("construct invocation tree") {
 
-    def method(x: String): Method =
+    def method(x: String, invokes: Seq[String]): Method =
       Method(
         pkg = Package(Seq(QualId(s"package${x.toLowerCase}"))),
         templateDefinitionName = TemplateDefinitionName(s"Class$x"),
-        methodName = MethodName(x)
+        methodName = MethodName(x),
+        invokeTargets = invokes.map { i =>
+          InvokeTarget(
+            pkg = Package(Seq(QualId(s"package${i.toLowerCase}"))),
+            templateDefinitionName = TemplateDefinitionName(s"Class$i"),
+            methodName = MethodName(i))
+        }
       )
 
-    val A = method("A")
-    val B = method("B")
-    val C = method("C")
-    val D = method("D")
-    val E = method("E")
-    val F = method("F")
-    val G = method("G")
-    val H = method("H")
-    val I = method("I")
-    val J = method("J")
+    val A = method("A", Seq("B", "D", "J"))
+    val B = method("B", Seq("C", "G"))
+    val C = method("C", Seq())
+    val D = method("D", Seq("E"))
+    val E = method("E", Seq("F"))
+    val F = method("F", Seq())
+    val G = method("G", Seq("H"))
+    val H = method("H", Seq("I"))
+    val I = method("I", Seq())
+    val J = method("J", Seq("B"))
+    val allMethods = Seq(A, B, C, D, E, F, G, H, I, J)
 
-    val invocations = Seq(
-      A -> B,
-      B -> C,
-      B -> G,
-      G -> H,
-      H -> I,
-      A -> D,
-      D -> E,
-      E -> F,
-      A -> J,
-      J -> B
-    ).map {
-      case (from, to) => MethodInvocation(invoker = from, target = to)
-    }
-
-    val actual = InvocationTree.construct(A, invocations)
+    val actual = InvocationTree.construct(A, allMethods)
     val expected = InvocationBranch(
-      invoker = A,
+      pkg = A.pkg,
+      templateDefinitionName = A.templateDefinitionName,
+      methodName = A.methodName,
       level = 0,
-      invokes = Seq(
+      targets = Seq(
         InvocationBranch(
-          invoker = B,
+          pkg = B.pkg,
+          templateDefinitionName = B.templateDefinitionName,
+          methodName = B.methodName,
           level = 1,
-          invokes = Seq(
-            InvocationLeaf(C, 2),
+          targets = Seq(
+            InvocationLeaf(
+              pkg = C.pkg,
+              templateDefinitionName = C.templateDefinitionName,
+              methodName = C.methodName,
+              level = 2),
             InvocationBranch(
-              invoker = G,
+              pkg = G.pkg,
+              templateDefinitionName = G.templateDefinitionName,
+              methodName = G.methodName,
               level = 2,
-              invokes = Seq(
+              targets = Seq(
                 InvocationBranch(
-                  invoker = H,
+                  pkg = H.pkg,
+                  templateDefinitionName = H.templateDefinitionName,
+                  methodName = H.methodName,
                   level = 3,
-                  invokes = Seq(InvocationLeaf(I, 4))))))
+                  targets = Seq(
+                    InvocationLeaf(
+                      pkg = I.pkg,
+                      templateDefinitionName = I.templateDefinitionName,
+                      methodName = I.methodName,
+                      level = 4))
+                ))
+            )
+          )
         ),
         InvocationBranch(
-          invoker = D,
+          pkg = D.pkg,
+          templateDefinitionName = D.templateDefinitionName,
+          methodName = D.methodName,
           level = 1,
-          invokes = Seq(
+          targets = Seq(
             InvocationBranch(
-              invoker = E,
+              pkg = E.pkg,
+              templateDefinitionName = E.templateDefinitionName,
+              methodName = E.methodName,
               level = 2,
-              invokes = Seq(InvocationLeaf(F, 3))))),
+              targets = Seq(
+                InvocationLeaf(
+                  pkg = F.pkg,
+                  templateDefinitionName = F.templateDefinitionName,
+                  methodName = F.methodName,
+                  level = 3))
+            ))
+        ),
         InvocationBranch(
-          invoker = J,
+          pkg = J.pkg,
+          templateDefinitionName = J.templateDefinitionName,
+          methodName = J.methodName,
           level = 1,
-          invokes = Seq(
+          targets = Seq(
             InvocationBranch(
-              invoker = B,
+              pkg = B.pkg,
+              templateDefinitionName = B.templateDefinitionName,
+              methodName = B.methodName,
               level = 2,
-              invokes = Seq(
-                InvocationLeaf(C, 3),
+              targets = Seq(
+                InvocationLeaf(
+                  pkg = C.pkg,
+                  templateDefinitionName = C.templateDefinitionName,
+                  methodName = C.methodName,
+                  level = 3
+                ),
                 InvocationBranch(
-                  invoker = G,
+                  pkg = G.pkg,
+                  templateDefinitionName = G.templateDefinitionName,
+                  methodName = G.methodName,
                   level = 3,
-                  invokes = Seq(
+                  targets = Seq(
                     InvocationBranch(
-                      invoker = H,
+                      pkg = H.pkg,
+                      templateDefinitionName = H.templateDefinitionName,
+                      methodName = H.methodName,
                       level = 4,
-                      invokes = Seq(InvocationLeaf(I, 5))))))
+                      targets = Seq(
+                        InvocationLeaf(
+                          pkg = I.pkg,
+                          templateDefinitionName = I.templateDefinitionName,
+                          methodName = I.methodName,
+                          level = 5))
+                    ))
+                )
+              )
             ))
         )
       )
@@ -94,14 +143,18 @@ class InvocationTreeTest extends AnyFunSuite {
   }
 
   test("limit exceed") {
-    val invocations = Iterator.from(1).sliding(2).map {
-      case Seq(a, b) =>
-        val methodA = Method(Package(Seq(QualId(s"$a"))), TemplateDefinitionName(s"$a"), MethodName(s"$a"))
-        val methodB = Method(Package(Seq(QualId(s"$b"))), TemplateDefinitionName(s"$b"), MethodName(s"$b"))
-        MethodInvocation(methodA, methodB)
-    }.take(200).toSeq
-
-    val start = invocations.head.invoker
-    assertThrows[TooDeepMethodInvocationException](InvocationTree.construct(start, invocations))
+    val infiniteMethod = Method(
+      Package(Seq(QualId("a"))),
+      TemplateDefinitionName("A"),
+      MethodName("a()"),
+      invokeTargets = Seq(
+        InvokeTarget(
+          Package(Seq(QualId("a"))),
+          TemplateDefinitionName("A"),
+          MethodName("a()")
+        )
+      )
+    )
+    assertThrows[TooDeepMethodInvocationException](InvocationTree.construct(infiniteMethod, Seq(infiniteMethod)))
   }
 }

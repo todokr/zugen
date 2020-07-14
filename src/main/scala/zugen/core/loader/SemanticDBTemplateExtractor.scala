@@ -3,7 +3,7 @@ package zugen.core.loader
 import scala.meta._
 import scala.meta.contrib.{DocToken, ScaladocParser}
 import scala.meta.internal.semanticdb.SymbolOccurrence.Role
-import scala.meta.internal.semanticdb.{Range, SymbolOccurrence, TextDocument}
+import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
 import scala.util.chaining._
 
 import zugen.core.loader.ReferredSymbol.InvokedSymbol
@@ -14,23 +14,18 @@ import zugen.core.models._
 trait SemanticDBTemplateExtractor {
 
   /** Extract templates from TextDocuments of SemanticDB */
-  def extractTemplates(docs: Seq[TextDocument]): TemplateDefinitions =
+  def extractTemplateDefinitions(docs: Seq[TextDocument]): TemplateDefinitions =
     docs
       .flatMap { doc =>
-        println(s"${doc.uri} -----------------------------------------")
-        val source = doc.text.parse[Source].get
-        val packages = source.collect { case p: Pkg => p }
+        println(s"processing... ${doc.uri}")
         val fileName = FileName(doc.uri)
-
-        val referredFQCNs = doc.occurrences
-          .collect {
-            case SymbolOccurrence(Some(range), symbol, Role.REFERENCE) => ReferredSymbol.of(symbol, range)
-          }
-
+        val source = doc.text.parse[Source].get
+        val pkg = source.collect { case p: Pkg => p.ref.toString }.mkString(".").pipe(Package)
+        val referredSymbols = doc.occurrences.collect {
+          case SymbolOccurrence(Some(range), symbol, Role.REFERENCE) => ReferredSymbol.of(symbol, range)
+        }.pipe(ReferredSymbols)
         val scaladocs = {
-          val tokens =
-            doc.text.tokenize.getOrElse(throw new Exception(s"failed to tokenize code: ${doc.uri}"))
-          val fileName = FileName(doc.uri)
+          val tokens = doc.text.tokenize.get
           val comments = tokens.collect { case c: Token.Comment => c }
           comments.flatMap { comment =>
             ScaladocParser
@@ -48,171 +43,131 @@ trait SemanticDBTemplateExtractor {
           }
         }.pipe(Scaladocs)
 
-        packages.flatMap { p =>
-          val pkg = Package(p.ref.toString)
-          p.stats.collect {
-            case c: Defn.Class =>
-              val definitionName = TemplateDefinitionName(c.name.toString)
-              val scaladoc = scaladocs.findByLineNum(c.pos.startLine)
-              val constructor =
-                resolveConstructor(c.ctor.paramss.flatten, referredFQCNs)
+        source.collect {
+          case c: Defn.Class =>
+            val definitionName = TemplateDefinitionName(c.name.value)
+            val scaladoc = scaladocs.findByLineNum(c.pos.startLine)
+            val constructor = resolveConstructor(c.ctor.paramss.flatten, referredSymbols)
+            val parents = resolveParents(c.templ.inits, referredSymbols)
+            val methods = resolveMethods(pkg, definitionName, c.templ, referredSymbols)
 
-              val parents = resolveParents(c.templ.inits, referredFQCNs)
-              resolveInvocations(pkg, definitionName, c.templ, referredFQCNs).foreach(println)
-
-              ClassDefinition(
-                name = definitionName,
-                modifier = c.mods
-                  .map(toModElm)
-                  .collect { case Some(mod) => mod }
-                  .pipe(Modifiers(_)),
-                parents = parents,
-                pkg = pkg,
-                constructor = constructor,
-                methods = Seq.empty,
-                fileName = fileName,
-                scaladoc = scaladoc,
-                startLine = c.pos.startLine,
-                endLine = c.pos.endLine
-              )
-            case t: Defn.Trait =>
-              val definitionName = TemplateDefinitionName(t.name.toString)
-              val scaladoc = scaladocs.findByLineNum(t.pos.startLine)
-              val parents = resolveParents(t.templ.inits, referredFQCNs)
-
-              resolveInvocations(pkg, definitionName, t.templ, referredFQCNs).foreach(println)
-
-              TraitDefinition(
-                name = definitionName,
-                modifier = t.mods
-                  .map(toModElm)
-                  .collect { case Some(mod) => mod }
-                  .pipe(Modifiers(_)),
-                parents = parents,
-                pkg = pkg,
-                methods = Seq.empty,
-                fileName = fileName,
-                scaladoc = scaladoc,
-                startLine = t.pos.startLine,
-                endLine = t.pos.endLine
-              )
-            case o: Defn.Object =>
-              val definitionName = TemplateDefinitionName(o.name.toString)
-              val scaladoc = scaladocs.findByLineNum(o.pos.startLine)
-              val parents = resolveParents(o.templ.inits, referredFQCNs)
-
-              resolveInvocations(pkg, definitionName, o.templ, referredFQCNs).foreach(println)
-
-              ObjectDefinition(
-                name = TemplateDefinitionName(o.name.toString),
-                modifier = o.mods
-                  .map(toModElm)
-                  .collect { case Some(mod) => mod }
-                  .pipe(Modifiers(_)),
-                parents = parents,
-                pkg = pkg,
-                methods = Seq.empty,
-                fileName = fileName,
-                scaladoc = scaladoc,
-                startLine = o.pos.startLine,
-                endLine = o.pos.endLine
-              )
-          }
-        }
-      }.pipe(TemplateDefinitions(_))
-
-  private def resolveParents(inits: Seq[Init], referredFQCNs: Seq[ReferredSymbol]): Parents =
-    inits
-      .map { init =>
-        val (typeName, typeArgs) = init.tpe match {
-          // TODO handle more nested case
-          case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString)) // ex: ParentClass[TypeParam]
-          case x              => (x.toString, Seq.empty)
-        }
-        val pkg = referredFQCNs
-          .find { r =>
-            r.startLine == init.pos.startLine &&
-            r.endLine == init.pos.endLine &&
-            r.startColumn == init.pos.startColumn &&
-            r.endColumn == init.pos.endColumn
-          } match {
-          case Some(fqcn) => fqcn.pkg
-          case None =>
-            println(
-              s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for parent not found: typeName = ${typeName},  ${init.pos.startLine}:${init.pos.endLine} ${init.pos.startColumn}~${init.pos.endColumn}"
+            ClassDefinition(
+              name = definitionName,
+              modifier = c.mods
+                .map(toModElm)
+                .collect { case Some(mod) => mod }
+                .pipe(Modifiers(_)),
+              parents = parents,
+              pkg = pkg,
+              constructor = constructor,
+              methods = methods,
+              fileName = fileName,
+              scaladoc = scaladoc,
+              startLine = c.pos.startLine,
+              endLine = c.pos.endLine
             )
-            Package.unknown
+          case t: Defn.Trait =>
+            val definitionName = TemplateDefinitionName(t.name.value)
+            val scaladoc = scaladocs.findByLineNum(t.pos.startLine)
+            val parents = resolveParents(t.templ.inits, referredSymbols)
+            val methods = resolveMethods(pkg, definitionName, t.templ, referredSymbols)
+
+            TraitDefinition(
+              name = definitionName,
+              modifier = t.mods
+                .map(toModElm)
+                .collect { case Some(mod) => mod }
+                .pipe(Modifiers(_)),
+              parents = parents,
+              pkg = pkg,
+              methods = methods,
+              fileName = fileName,
+              scaladoc = scaladoc,
+              startLine = t.pos.startLine,
+              endLine = t.pos.endLine
+            )
+          case o: Defn.Object =>
+            val definitionName = TemplateDefinitionName(o.name.value)
+            val scaladoc = scaladocs.findByLineNum(o.pos.startLine)
+            val parents = resolveParents(o.templ.inits, referredSymbols)
+            val methods = resolveMethods(pkg, definitionName, o.templ, referredSymbols)
+
+            ObjectDefinition(
+              name = TemplateDefinitionName(o.name.toString),
+              modifier = o.mods
+                .map(toModElm)
+                .collect { case Some(mod) => mod }
+                .pipe(Modifiers(_)),
+              parents = parents,
+              pkg = pkg,
+              methods = methods,
+              fileName = fileName,
+              scaladoc = scaladoc,
+              startLine = o.pos.startLine,
+              endLine = o.pos.endLine
+            )
         }
 
-        val tpe = ParentType(typeName, typeArgs, pkg)
-        Parent(tpe)
-      }
-      .pipe(Parents)
+      }.pipe(TemplateDefinitions)
+
+  private def resolveParents(inits: Seq[Init], referredSymbols: ReferredSymbols): Parents =
+    inits.map { init =>
+      val (typeName, typeArgs) = deconstructType(init.tpe)
+      val pkg = referredSymbols
+        .findByPosition(init.tpe.pos)
+        .map(_.pkg)
+        .getOrElse {
+          println(
+            s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for parent not found: typeName = ${typeName},  ${init.pos.startLine}:${init.pos.endLine} ${init.pos.startColumn}~${init.pos.endColumn}"
+          )
+          Package.unknown
+        }
+      ParentType(typeName.value, typeArgs.map(_.value), pkg).pipe(Parent)
+    }.pipe(Parents)
 
   private def resolveConstructor(
     params: Seq[Term.Param],
-    referredFQCNs: Seq[ReferredSymbol]
+    referredSymbols: ReferredSymbols
   ): Constructor =
     params
       .map { param =>
-        val tpe = param.decltpe.map {
-          // TODO handle more nested case
-          case Type.Apply(name, _) => name // ex: Id[T] -> Id
-          case x                   => x
-        }.getOrElse(
-          throw new Exception(s"Declaration type not found for $param")
-        )
+        val (typeName, typeArgs) =
+          param.decltpe.map(deconstructType)
+            .getOrElse(throw new Exception(s"Declaration type not found for $param"))
 
-        val (typeName, typeArgs) = tpe match {
-          // TODO handle more nested case
-          case ap: Type.Apply => (ap.tpe.toString, ap.args.map(_.toString))
-          case x              => (x.toString, Seq.empty)
-        }
-        val pkg = referredFQCNs
-          .find { r =>
-            r.startLine == tpe.pos.startLine &&
-            r.endLine == tpe.pos.endLine &&
-            r.startColumn == tpe.pos.startColumn &&
-            r.endColumn == tpe.pos.endColumn
-          } match {
-          case Some(fqcn) => fqcn.pkg
-          case None =>
+        val pkg = referredSymbols
+          .findByPosition(typeName.pos)
+          .map(_.pkg)
+          .getOrElse {
             println(
               s"${Console.YELLOW}[WARN]${Console.RESET} FQCN for constructor not found: typeName = ${typeName}, typeArgs = ${typeArgs
                 .mkString(",")}, ${param.pos.startLine}:${param.pos.endLine} ${param.pos.startColumn}~${param.pos.endColumn}"
             )
             Package.unknown
-        }
-
+          }
         ConstructorArgument(
           ConstructorArgumentName(param.name.toString),
-          ConstructorArgumentType(typeName, typeArgs, pkg)
+          ConstructorArgumentType(typeName.value, typeArgs.map(_.value), pkg)
         )
       }
       .pipe(Constructor)
 
-  def resolveInvocations(
+  private def resolveMethods(
     pkg: Package,
     templateDefinitionName: TemplateDefinitionName,
     template: Template,
-    referredSymbols: Seq[ReferredSymbol]): Seq[Method] = {
+    referredSymbols: ReferredSymbols): Seq[Method] = {
     val methods = template.stats.collect { case d: Defn.Def => d }
     methods.map { method =>
       val invokes = method.body.collect {
-        case a: Term.Apply =>
-          val (targetName, pos) = a.fun match {
+        case Term.Apply(fun, _) =>
+          val (targetName, pos) = fun match {
             case s: Term.Select  => s.name.value -> s.name.pos
             case name: Term.Name => name.value -> name.pos
             case x               => x.toString -> x.pos
           }
-
-          referredSymbols.collectFirst {
-            case symbol: InvokedSymbol
-                if symbol.startLine == pos.startLine &&
-                  symbol.endLine == pos.endLine &&
-                  symbol.startColumn == pos.startColumn &&
-                  symbol.endColumn == pos.endColumn =>
-              Invoke(symbol.pkg, symbol.templateDefinitionName, MethodName(targetName))
+          referredSymbols.findByPosition(pos).collect {
+            case s: InvokedSymbol => InvokeTarget(s.pkg, s.templateDefinitionName, MethodName(targetName))
           }
       }.collect { case Some(x) => x }
       Method(pkg, templateDefinitionName, MethodName(method.name.toString), invokes)
@@ -231,58 +186,31 @@ trait SemanticDBTemplateExtractor {
       case _                               => None
     }
 
-}
-
-/** A referred symbol occurred in source code */
-sealed trait ReferredSymbol {
-  val startLine: Int
-  val endLine: Int
-  val startColumn: Int
-  val endColumn: Int
-  val symbol: String
-  val pkg: Package = Package(symbol.split("/").toIndexedSeq.init.map(QualId))
-}
-object ReferredSymbol {
-
-  private val MethodInvocationSuffix = "()."
-
-  def of(symbol: String, range: Range): ReferredSymbol =
-    symbol match {
-      case s if s.endsWith(MethodInvocationSuffix) =>
-        InvokedSymbol(
-          startLine = range.startLine,
-          endLine = range.endLine,
-          startColumn = range.startCharacter,
-          endColumn = range.endCharacter,
-          symbol = symbol
-        )
-      case _ =>
-        PlainSymbol(
-          startLine = range.startLine,
-          endLine = range.endLine,
-          startColumn = range.startCharacter,
-          endColumn = range.endCharacter,
-          symbol = symbol
-        )
+  private def deconstructType(tpe: Type): (Type.Name, Seq[Type.Name]) =
+    tpe match {
+      case n: Type.Name => // just a type name (ex. String)
+        n -> Seq.empty[Type.Name]
+      case Type.Select(_, tpe) => // plain type (ex. controllers.OrderController)
+        tpe.collect { case name: Type.Name => name }.head -> Seq.empty[Type.Name]
+      case Type.Apply(tpe, args) => // with type param (ex. Id[T])
+        tpe.collect { case name: Type.Name => name }.head -> args.collect { case n: Type.Name => n }
+      case Type.ByName(tpe) => // by name type (ex. => String)
+        tpe.collect { case name: Type.Name => name }.head -> Seq.empty[Type.Name]
+      case x =>
+        println(
+          s"${Console.YELLOW}[WARN]${Console.RESET} unknown type. class=${x.getClass.getName}, type=${x}")
+        x.collect { case name: Type.Name => name }.head -> Seq.empty[Type.Name]
     }
+}
 
-  final case class PlainSymbol(
-    startLine: Int,
-    endLine: Int,
-    startColumn: Int,
-    endColumn: Int,
-    symbol: String
-  ) extends ReferredSymbol
+/** Referred symbols occurred in source code */
+final case class ReferredSymbols(elms: Seq[ReferredSymbol]) {
 
-  final case class InvokedSymbol(
-    startLine: Int,
-    endLine: Int,
-    startColumn: Int,
-    endColumn: Int,
-    symbol: String
-  ) extends ReferredSymbol {
-
-    val templateDefinitionName: TemplateDefinitionName =
-      symbol.split("/").last.split("""[#\\.]""").head.pipe(TemplateDefinitionName)
-  }
+  def findByPosition(pos: Position): Option[ReferredSymbol] =
+    elms.find { s =>
+      s.startLine == pos.startLine &&
+      s.endLine == pos.endLine &&
+      s.startColumn == pos.startColumn &&
+      s.endColumn == pos.endColumn
+    }
 }
