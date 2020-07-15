@@ -1,0 +1,16 @@
+@import java.time.LocalDateTime
+@import play.twirl.api.Html
+
+@(dot: String, generatedAt: LocalDateTime)
+@views.html.Layout("Method Invocation Diagram", generatedAt) {
+<div id="method-invocation-diagram" class="container">
+  <h1 class="page-title">Method Invocation Diagram</h1>
+  <div id="graph"></div>
+</div>
+} {
+<script>
+    d3.select("#graph").graphviz().height(1200)
+      .fade(false)
+      .renderDot(`@{Html(dot)}`);
+  </script>
+}

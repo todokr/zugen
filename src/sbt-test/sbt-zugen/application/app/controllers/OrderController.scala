@@ -37,14 +37,14 @@ class OrderController @Inject() (
 
 object OrderController {
 
-  implicit def idReads[T]: Reads[Id[T]] = Reads.StringReads.map(Id[T])
-  implicit def idWrites[T]: Writes[Id[T]] = Writes.StringWrites.contramap(_.value)
-  implicit def commandReads: Reads[PlaceOrderCommand] = Json.reads[PlaceOrderCommand]
-  implicit def orderStatusWrites: Writes[OrderStatus] =
+  private implicit def idReads[T]: Reads[Id[T]] = Reads.StringReads.map(Id[T])
+  private implicit def idWrites[T]: Writes[Id[T]] = Writes.StringWrites.contramap(_.value)
+  private implicit def commandReads: Reads[PlaceOrderCommand] = Json.reads[PlaceOrderCommand]
+  private implicit def orderStatusWrites: Writes[OrderStatus] =
     Writes {
       case OrderStatus.Placed    => JsString("placed")
       case OrderStatus.Completed => JsString("completed")
     }
-  implicit val weirdClassWrites: Writes[WeirdClass] = Writes(_ => JsString("weird"))
-  implicit def orderWrites: Writes[Order] = Json.writes[Order]
+  private implicit val weirdClassWrites: Writes[WeirdClass] = Writes(_ => JsString("weird"))
+  private implicit def orderWrites: Writes[Order] = Json.writes[Order]
 }

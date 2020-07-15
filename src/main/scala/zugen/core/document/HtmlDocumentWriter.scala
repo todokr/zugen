@@ -15,18 +15,21 @@ object HtmlDocumentWriter extends DocumentWriter {
   ): GeneratedDocument = {
     val (doc, html) = document match {
       case doc: DomainObjectTableDocument =>
-        doc -> views.html.domainobject.DomainObjectTable(doc, generatedAt).body
+        doc -> views.html.DomainObjectTable(doc, generatedAt).body
       case doc: DomainRelationDiagramDocument =>
-        val dot = views.txt.domainobject.ObjectRefs(doc.digraph).body.replace("""`""", """\`""")
-        doc -> views.html.domainobject.DomainRelationDiagram(dot, generatedAt).body
+        val dot = escapeForDot(views.txt.ObjectRefs(doc.digraph).body)
+        doc -> views.html.DomainRelationDiagram(dot, generatedAt).body
       case doc: MethodInvocationDiagramDocument =>
-        doc -> ""
+        val dot = escapeForDot(views.txt.InvocationTree().body)
+        doc -> views.html.MethodInvocationDiagram(dot, generatedAt).body
     }
     val filePath = config.documentPath.value.resolve(s"${doc.docCode}.html")
 
     Files.write(filePath, html.getBytes(StandardCharsets.UTF_8))
     GeneratedDocument(doc.docName, filePath)
   }
+
+  private def escapeForDot(body: String): String = body.replace("""`""", """\`""")
 
   /** generate index document for generated documents */
   override def writeIndexDocument(

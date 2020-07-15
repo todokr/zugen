@@ -1,0 +1,67 @@
+@()
+digraph "Method Invocation Diagram" {
+  graph [
+    rankdir = LR
+    charset = "UTF-8"
+    bgcolor = "#343434"
+    fontcolor = "#eeeeee"
+    style = "filled"
+  ]
+
+  node [
+    colorscheme = rdylgn11
+    shape = box
+    fontname="Arial"
+    color = "#555555"
+    fontsize = 10
+    fontcolor = "#eeeeee"
+    margin = 0.15
+    style = "rounded"
+  ]
+  edge [
+    arrowhead=vee
+    tailport=e
+    headport=w
+    style = solid
+    color = "#555555"
+    penwidth = 0.5
+    arrowsize = 0.5
+  ]
+
+  controllers_OrderController_get -> service_OrderQueryService_findById
+  controllers_OrderController_get -> service_OrderQueryService_findByEmail
+  controllers_OrderController_post -> service_OrderSpec_placeOrderRule
+  controllers_OrderController_post -> service_OrderCommandService_placeOrder
+  service_OrderCommandService_placeOrder -> repository_Order_place
+
+  controllers_OrderController_get [
+    label = <<font align="left" point-size="8">controllers</font><br align="left" />OrderController#get>
+  ]
+
+  service_OrderQueryService_findById [
+    label = <<font align="left" point-size="8">service</font><br align="left" />OrderQueryService#findById>
+  ]
+
+  service_OrderQueryService_findByEmail [
+    label = <<font align="left" point-size="8">service</font><br align="left" />OrderQueryService#findByEmail>
+  ]
+
+  controllers_OrderController_post [
+    label = <<font align="left" point-size="8">controllers</font><br align="left" />OrderController#post>
+  ]
+
+  service_OrderSpec_placeOrderRule [
+    label = <<font align="left" point-size="8">service</font><br align="left" />OrderSpec#applyOrderRule>
+  ]
+
+  service_OrderCommandService_placeOrder [
+    label = <<font align="left" point-size="8">service</font><br align="left" />OrderCommandService#placeOrder>
+  ]
+
+  repository_Order_place [
+    label = <<font align="left" point-size="8">repository</font><br align="left" />Order#place>
+  ]
+
+  { rank = min; controllers_OrderController_get; controllers_OrderController_post;}
+
+}

@@ -1,10 +1,10 @@
 package zugen.core.document
 
 import zugen.core.config.Config
-import zugen.core.document.MethodInvocationDiagramDocument.InvocationTree
-import zugen.core.models.{DocumentMaterials, Method, MethodName, Package, TemplateDefinitionName}
+import zugen.core.document.MethodInvocationDiagramDocument.Invocation
+import zugen.core.models.{DocumentMaterials, InvokeTarget, Method, MethodName, Package, TemplateDefinitionName}
 
-case class MethodInvocationDiagramDocument(invocationTrees: Seq[InvocationTree]) extends Document {
+case class MethodInvocationDiagramDocument(invocations: Seq[Invocation]) extends Document {
   override val docCode: String = "method-invocation-diagram"
   override val docName: String = "Method Invocation Diagram"
 }
@@ -15,17 +15,37 @@ object MethodInvocationDiagramDocument {
     config.methodInvocationStartingPackage match {
       case Some(p) =>
         val startingPackage = Package(p.value)
-        val startingMethods = documentMaterial.elms.collect {
-          case material if material.templateDefinition.pkg == startingPackage =>
-            material.templateDefinition.methods
-        }.flatten
-        startingMethods.foreach(println)
-        MethodInvocationDiagramDocument(Seq.empty)
+        val allMethods = documentMaterial.elms.flatMap { material =>
+          material.templateDefinition.methods
+        }
+        val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
+        val invocations = (startingMethods ++ restMethods).flatMap { method =>
+          val from = InvocationItem(genItemId(method), method.pkg, method.templateDefinitionName, method.methodName)
+          method.invokeTargets.map { target =>
+            val to = InvocationItem(genItemId(target), target.pkg, target.templateDefinitionName, target.methodName)
+            Invocation(from, to)
+          }
+        }
+        MethodInvocationDiagramDocument(invocations)
       case None =>
         println(s"${Console.YELLOW}[WARN]${Console.RESET} Config for Method Invocation Diagram not found.")
         MethodInvocationDiagramDocument(Seq.empty)
     }
   }
+
+  def genItemId(method: Method) =
+    s"${method.pkg.toString.replace(".", "_")}_${method.templateDefinitionName}_${method.methodName}"
+
+  def genItemId(target: InvokeTarget) =
+    s"${target.pkg.toString.replace(".", "_")}_${target.templateDefinitionName}_${target.methodName}"
+
+  final case class Invocation(from: InvocationItem, to: InvocationItem)
+  final case class InvocationItem(
+    itemId: String,
+    pkg: Package,
+    templateDefinitionName: TemplateDefinitionName,
+    methodName: MethodName
+  )
 
   sealed trait InvocationTree
 
