@@ -7,7 +7,11 @@ case class Package(ids: Seq[QualId]) {
   def isInPackage(other: Package): Boolean =
     toString.startsWith(other.toString)
 
-  override def toString: String = ids.mkString(".")
+  override def toString: String = {
+    val expression = ids.mkString(".")
+    if (expression.trim().isEmpty) "DEFAULT_PACKAGE"
+    else expression
+  }
 }
 
 object Package extends (String => Package) {

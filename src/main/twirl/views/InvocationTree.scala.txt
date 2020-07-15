@@ -1,4 +1,7 @@
-@()
+@import zugen.core.document.MethodInvocationDiagramDocument.Invocation
+@import play.twirl.api.TwirlFeatureImports.defining
+
+@(invocations: Seq[Invocation])
 digraph "Method Invocation Diagram" {
   graph [
     rankdir = LR
@@ -28,40 +31,23 @@ digraph "Method Invocation Diagram" {
     arrowsize = 0.5
   ]
 
-  controllers_OrderController_get -> service_OrderQueryService_findById
-  controllers_OrderController_get -> service_OrderQueryService_findByEmail
-  controllers_OrderController_post -> service_OrderSpec_placeOrderRule
-  controllers_OrderController_post -> service_OrderCommandService_placeOrder
-  service_OrderCommandService_placeOrder -> repository_Order_place
+  @for(invocation <- invocations) {
+    @invocation.from.itemId -> @invocation.to.itemId
+  }
 
-  controllers_OrderController_get [
-    label = <<font align="left" point-size="8">controllers</font><br align="left" />OrderController#get>
-  ]
+  @defining(invocations.flatMap(i => Seq(i.from, i.to)).toSet) { items =>
+    @for(item <- items) {
+        @item.itemId [
+          label = <<font align="left" point-size="8">@item.pkg</font><br align="left" />@item.templateDefinitionName#@item.methodName>
+        ]
+      }
 
-  service_OrderQueryService_findById [
-    label = <<font align="left" point-size="8">service</font><br align="left" />OrderQueryService#findById>
-  ]
-
-  service_OrderQueryService_findByEmail [
-    label = <<font align="left" point-size="8">service</font><br align="left" />OrderQueryService#findByEmail>
-  ]
-
-  controllers_OrderController_post [
-    label = <<font align="left" point-size="8">controllers</font><br align="left" />OrderController#post>
-  ]
-
-  service_OrderSpec_placeOrderRule [
-    label = <<font align="left" point-size="8">service</font><br align="left" />OrderSpec#applyOrderRule>
-  ]
-
-  service_OrderCommandService_placeOrder [
-    label = <<font align="left" point-size="8">service</font><br align="left" />OrderCommandService#placeOrder>
-  ]
-
-  repository_Order_place [
-    label = <<font align="left" point-size="8">repository</font><br align="left" />Order#place>
-  ]
-
-  { rank = min; controllers_OrderController_get; controllers_OrderController_post;}
-
+    @defining(items.filter(_.isTopLevel)) { topLevelItems =>
+      { rank = same;
+      @for(item <- topLevelItems) {
+        @item.itemId;
+      }
+      }
+    }
+  }
 }

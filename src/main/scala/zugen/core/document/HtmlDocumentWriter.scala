@@ -20,7 +20,8 @@ object HtmlDocumentWriter extends DocumentWriter {
         val dot = escapeForDot(views.txt.ObjectRefs(doc.digraph).body)
         doc -> views.html.DomainRelationDiagram(dot, generatedAt).body
       case doc: MethodInvocationDiagramDocument =>
-        val dot = escapeForDot(views.txt.InvocationTree().body)
+        play.twirl.api.TwirlHelperImports
+        val dot = escapeForDot(views.txt.InvocationTree(doc.invocations).body)
         doc -> views.html.MethodInvocationDiagram(dot, generatedAt).body
     }
     val filePath = config.documentPath.value.resolve(s"${doc.docCode}.html")

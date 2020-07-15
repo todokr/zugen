@@ -18,11 +18,23 @@ object MethodInvocationDiagramDocument {
         val allMethods = documentMaterial.elms.flatMap { material =>
           material.templateDefinition.methods
         }
-        val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
-        val invocations = (startingMethods ++ restMethods).flatMap { method =>
-          val from = InvocationItem(genItemId(method), method.pkg, method.templateDefinitionName, method.methodName)
+        // val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
+        val invocations = allMethods.flatMap { method =>
+          val from = InvocationItem(
+            itemId = genItemId(method),
+            pkg = method.pkg,
+            templateDefinitionName = method.templateDefinitionName,
+            methodName = method.methodName,
+            isTopLevel = method.pkg == startingPackage
+          )
           method.invokeTargets.map { target =>
-            val to = InvocationItem(genItemId(target), target.pkg, target.templateDefinitionName, target.methodName)
+            val to = InvocationItem(
+              itemId = genItemId(target),
+              pkg = target.pkg,
+              templateDefinitionName = target.templateDefinitionName,
+              methodName = target.methodName,
+              isTopLevel = target.pkg == startingPackage
+            )
             Invocation(from, to)
           }
         }
@@ -44,7 +56,8 @@ object MethodInvocationDiagramDocument {
     itemId: String,
     pkg: Package,
     templateDefinitionName: TemplateDefinitionName,
-    methodName: MethodName
+    methodName: MethodName,
+    isTopLevel: Boolean
   )
 
   sealed trait InvocationTree
