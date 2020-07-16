@@ -3,7 +3,7 @@ package zugen.core.models
 import zugen.core.models.Modifier.AccessibilityModifier
 
 /** Modifiers for class etc. */
-case class Modifiers(elms: Seq[Modifier]) {
+final case class Modifiers(elms: Seq[Modifier]) {
 
   def accessibility: String =
     elms

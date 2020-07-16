@@ -2,7 +2,7 @@ package zugen.core.models
 
 import scala.util.chaining._
 
-case class Package(ids: Seq[QualId]) {
+final case class Package(ids: Seq[QualId]) {
 
   def isInPackage(other: Package): Boolean =
     toString.startsWith(other.toString)

@@ -4,9 +4,7 @@ final case class Config(
   documentsToGenerate: DocumentsToGenerate,
   domainPackages: Seq[DomainPackageName],
   domainObjectExcludePatterns: Seq[String],
-  methodInvocationStartingPackage: Option[MethodInvocationStartingPackage],
+  methodInvocationStartingPackage: Option[MethodInvocationRootPackage],
   documentPath: DocumentPath,
   classesPath: ClassesPath
 )
-
-case class MethodInvocationStartingPackage(value: String)

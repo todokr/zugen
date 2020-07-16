@@ -4,7 +4,7 @@ import zugen.core.config.Config
 import zugen.core.document.MethodInvocationDiagramDocument.Invocation
 import zugen.core.models.{DocumentMaterials, InvokeTarget, Method, MethodName, Package, TemplateDefinitionName}
 
-case class MethodInvocationDiagramDocument(invocations: Seq[Invocation]) extends Document {
+final case class MethodInvocationDiagramDocument(invocations: Seq[Invocation]) extends Document {
   override val docCode: String = "method-invocation-diagram"
   override val docName: String = "Method Invocation Diagram"
 }
@@ -18,8 +18,8 @@ object MethodInvocationDiagramDocument {
         val allMethods = documentMaterial.elms.flatMap { material =>
           material.templateDefinition.methods
         }
-        // val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
-        val invocations = allMethods.flatMap { method =>
+        val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
+        val invocations = (startingMethods ++ restMethods).flatMap { method =>
           val from = InvocationItem(
             itemId = genItemId(method),
             pkg = method.pkg,

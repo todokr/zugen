@@ -1,9 +1,10 @@
-package infrastructure
+package infrastructure.repository.order
 
 import scala.util.chaining._
 
 import domain.Id
-import domain.order.{Order, OrderRepository, OrderStatus}
+import domain.model.order.{Order, OrderStatus}
+import domain.repository.order.OrderRepository
 import strangepackage.WeirdClass
 
 class MockOrderRepository extends OrderRepository {

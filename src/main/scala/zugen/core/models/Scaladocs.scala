@@ -1,7 +1,7 @@
 package zugen.core.models
 
 /** Scaladocs in a source code file */
-case class Scaladocs(elms: Seq[Scaladoc]) {
+final case class Scaladocs(elms: Seq[Scaladoc]) {
 
   /** find scaladoc connected to given definition block */
   def findDocForDefinition(definition: TemplateDefinition): Option[Scaladoc] =

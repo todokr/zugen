@@ -1,7 +1,7 @@
 package zugen.core.models
 
 /** A material of zugen document */
-case class DocumentMaterial(
+final case class DocumentMaterial(
   templateDefinition: TemplateDefinition,
   references: References
 )

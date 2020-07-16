@@ -36,7 +36,7 @@ sealed trait TemplateDefinition {
 
 object TemplateDefinition {
 
-  case class ClassDefinition(
+  final case class ClassDefinition(
     pkg: Package,
     name: TemplateDefinitionName,
     modifier: Modifiers,
@@ -65,7 +65,7 @@ object TemplateDefinition {
     }
   }
 
-  case class TraitDefinition(
+  final case class TraitDefinition(
     pkg: Package,
     name: TemplateDefinitionName,
     modifier: Modifiers,
@@ -77,7 +77,7 @@ object TemplateDefinition {
     endLine: Int
   ) extends TemplateDefinition
 
-  case class ObjectDefinition(
+  final case class ObjectDefinition(
     pkg: Package,
     name: TemplateDefinitionName,
     modifier: Modifiers,

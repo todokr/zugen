@@ -31,7 +31,7 @@ digraph "Method Invocation Diagram" {
     arrowsize = 0.5
   ]
 
-  @for(invocation <- invocations) {
+  @for(invocation <- invocations.reverse) {
     @invocation.from.itemId -> @invocation.to.itemId
   }
 

@@ -68,25 +68,25 @@ object DomainRelationDiagramDocument {
     ).pipe(DomainRelationDiagramDocument(_))
   }
 
-  case class Digraph(label: String, subGraphs: Seq[SubGraph], edges: Seq[Edge])
-  case class SubGraph(id: SubGraphId, label: String, nodes: Seq[Node])
+  final case class Digraph(label: String, subGraphs: Seq[SubGraph], edges: Seq[Edge])
+  final case class SubGraph(id: SubGraphId, label: String, nodes: Seq[Node])
   sealed trait Edge {
     def from: NodeId
   }
 
   /** edge of domain-internal inheritance */
-  case class DomainInternalInheritanceEdge(from: NodeId, to: NodeId) extends Edge
+  final case class DomainInternalInheritanceEdge(from: NodeId, to: NodeId) extends Edge
 
   /** edge of inheritance of outside of domain */
-  case class DomainExternalInheritanceEdge(from: NodeId, toLabel: String) extends Edge
+  final case class DomainExternalInheritanceEdge(from: NodeId, toLabel: String) extends Edge
 
   /** edge of domain-internal property */
-  case class DomainInternalPropertyEdge(from: NodeId, propertyLabel: String, to: NodeId) extends Edge
+  final case class DomainInternalPropertyEdge(from: NodeId, propertyLabel: String, to: NodeId) extends Edge
 
   /** edge of property of outside of domain */
-  case class DomainExternalPropertyEdge(from: NodeId, propertyLabel: String, toLabel: String) extends Edge
+  final case class DomainExternalPropertyEdge(from: NodeId, propertyLabel: String, toLabel: String) extends Edge
 
-  case class Node(id: NodeId, name: String, alias: Option[String]) {
+  final case class Node(id: NodeId, name: String, alias: Option[String]) {
     def label: String = alias.map(a => s"$name\n&quot;$a&quot;").getOrElse(name)
   }
 
@@ -110,11 +110,11 @@ object DomainRelationDiagramDocument {
     }
   }
 
-  case class SubGraphId(value: String) extends AnyVal {
+  final case class SubGraphId(value: String) extends AnyVal {
     override def toString: String = value
   }
 
-  case class NodeId(value: String) extends AnyVal {
+  final case class NodeId(value: String) extends AnyVal {
     override def toString: String = value
   }
 }

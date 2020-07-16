@@ -1,6 +1,8 @@
 import com.google.inject.AbstractModule
-import domain.order.OrderRepository
-import infrastructure.MockOrderRepository
+import domain.repository.customer.CustomerRepository
+import domain.repository.order.OrderRepository
+import infrastructure.repository.customer.MockCustomerRepository
+import infrastructure.repository.order.MockOrderRepository
 
 class Module extends AbstractModule {
 
@@ -8,5 +10,6 @@ class Module extends AbstractModule {
     super.configure()
 
     bind(classOf[OrderRepository]).to(classOf[MockOrderRepository])
+    bind(classOf[CustomerRepository]).to(classOf[MockCustomerRepository])
   }
 }

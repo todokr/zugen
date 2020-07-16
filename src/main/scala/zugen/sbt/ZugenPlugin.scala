@@ -84,7 +84,7 @@ object ZugenPlugin extends AutoPlugin {
       val domainPackages = getStringList(prop, DomainPackagesKey).map(DomainPackageName)
       val domainObjectExcludePatterns = getStringList(prop, DomainObjectExcludePatternsKey)
       val methodInvocationStartingPackage =
-        getString(prop, MethodInvocationStartingPackageKey).map(MethodInvocationStartingPackage)
+        getString(prop, MethodInvocationStartingPackageKey).map(MethodInvocationRootPackage)
       val documentPath = getString(prop, DocumentPathKey)
         .getOrElse((target.value / "zugen-docs").toString)
         .pipe(DocumentPath)
