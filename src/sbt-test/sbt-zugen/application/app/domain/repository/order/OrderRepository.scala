@@ -1,6 +1,7 @@
-package domain.order
+package domain.repository.order
 
 import domain.Id
+import domain.model.order.Order
 
 trait OrderRepository {
 

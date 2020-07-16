@@ -4,13 +4,14 @@ import java.nio.file.{Files, Path}
 
 import scala.jdk.CollectionConverters._
 import scala.meta.internal.semanticdb
+import scala.util.chaining._
 
 import zugen.core.config.Config
-import zugen.core.models.DocumentMaterial
+import zugen.core.models.{DocumentMaterial, DocumentMaterials}
 
-object SemanticDBMaterialLoader extends MaterialLoader with DefinitionExtractor with ScaladocExtractor {
+object SemanticDBMaterialLoader extends MaterialLoader with SemanticDBTemplateExtractor {
 
-  def load(config: Config): DocumentMaterial = {
+  def load(config: Config): DocumentMaterials = {
     val semanticdbRoot = config.classesPath.value.resolve("META-INF/semanticdb")
     if (!Files.exists(semanticdbRoot)) throw new SemanticdbDirectoryNotExistException(errorMsg(semanticdbRoot))
 
@@ -25,9 +26,15 @@ object SemanticDBMaterialLoader extends MaterialLoader with DefinitionExtractor 
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
 
-    val definitions = extractDefinitions(documents)
-    val scaladocs = extractScaladocs(documents)
-    definitions.mergeWithScaladoc(scaladocs)
+    val templateDefinitions = extractTemplateDefinitions(documents)
+    templateDefinitions.elms
+      .map { template =>
+        val references = template.resolveReferences(templateDefinitions)
+        DocumentMaterial(
+          templateDefinition = template,
+          references = references
+        )
+      }.pipe(DocumentMaterials)
   }
 
   class SemanticdbDirectoryNotExistException(msg: String) extends Exception(msg)

@@ -1,4 +1,4 @@
-package domain.order
+package domain.model.order
 
 sealed trait OrderStatus
 

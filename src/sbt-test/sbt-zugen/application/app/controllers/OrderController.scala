@@ -1,7 +1,7 @@
 package controllers
 
 import domain.Id
-import domain.order.{Order, OrderStatus}
+import domain.model.order.{Order, OrderStatus}
 import javax.inject._
 import play.api.libs.json._
 import play.api.mvc._
@@ -35,10 +35,8 @@ class OrderController @Inject() (
     }
 }
 
-object OrderController {
+object OrderController extends BaseFormats {
 
-  implicit def idReads[T]: Reads[Id[T]] = Reads.StringReads.map(Id[T])
-  implicit def idWrites[T]: Writes[Id[T]] = Writes.StringWrites.contramap(_.value)
   implicit def commandReads: Reads[PlaceOrderCommand] = Json.reads[PlaceOrderCommand]
   implicit def orderStatusWrites: Writes[OrderStatus] =
     Writes {

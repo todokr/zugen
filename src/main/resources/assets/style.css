@@ -84,17 +84,18 @@ tr:nth-child(even) {
     background: #eee;
 }
 
-#domain-relation-diagram {
+#domain-relation-diagram, #method-invocation-diagram {
   height: 100%;
   background: #343434;
+  padding-bottom: 0;
 }
 
-#domain-relation-diagram svg {
-  height: calc(100vh - 55px - 32px - 40px)!important;
+#domain-relation-diagram svg, #method-invocation-diagram svg {
+  height: calc(100vh - 55px - 32px)!important;
   width: 100%;
 }
 
-#domain-relation-diagram .page-title {
+#domain-relation-diagram .page-title, #method-invocation-diagram .page-title {
   padding: 16px;
   color: #ddd;
 }

@@ -1,24 +1,23 @@
 package zugen.core.models
 
-import zugen.core.models.Definitions.DefinitionBlock
 import zugen.core.models.References.Reference
 
 /** references that class etc. refers */
-case class References(elms: Seq[Reference])
+final case class References(elms: Seq[Reference])
 
 object References {
 
   sealed trait Reference
 
   sealed trait ProjectInternalReference extends Reference {
-    def definition: DefinitionBlock
+    def definition: TemplateDefinition
   }
 
   object ProjectInternalReference {
-    final case class ProjectInternalInheritance(definition: DefinitionBlock) extends ProjectInternalReference
+    final case class ProjectInternalInheritance(definition: TemplateDefinition) extends ProjectInternalReference
     final case class ProjectInternalProperty(
       memberName: String,
-      definition: DefinitionBlock
+      definition: TemplateDefinition
     ) extends ProjectInternalReference
   }
 

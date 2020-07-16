@@ -1,17 +1,19 @@
 package zugen.core.models
 
 import org.scalatest.funsuite.AnyFunSuite
-import zugen.core.models.Definitions.DefinitionBlock.TraitDefinitionBlock
+import zugen.core.models.TemplateDefinition.TraitDefinition
 
 class DefinitionsTest extends AnyFunSuite {
 
   test("isInAnyPackages") {
 
-    val block = TraitDefinitionBlock(
-      name = DefinitionName("SomeTrait"),
+    val block = TraitDefinition(
+      pkg = Package("example.domain.model"),
+      name = TemplateDefinitionName("SomeTrait"),
       modifier = Modifiers(Seq.empty),
       parents = Parents(Seq.empty),
-      pkg = Package("example.domain.model"),
+      methods = Seq.empty,
+      scaladoc = None,
       fileName = FileName("SomeTrait"),
       startLine = 0,
       endLine = 10

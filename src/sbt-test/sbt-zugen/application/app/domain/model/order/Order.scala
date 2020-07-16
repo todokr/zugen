@@ -1,7 +1,7 @@
-package domain.order
+package domain.model.order
 
 import domain.Id
-import domain.customer.Customer
+import domain.model.customer.Customer
 import strangepackage.WeirdClass
 
 /** An order */

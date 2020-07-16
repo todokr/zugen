@@ -1,15 +1,15 @@
 package services
 
 import javax.inject.Inject
-
 import domain.Id
-import domain.customer.Customer
-import domain.order.{Order, OrderRepository}
+import domain.model.customer.Customer
+import domain.model.order.Order
+import domain.repository.order.OrderRepository
 import services.OrderService.PlaceOrderCommand
 
 class OrderService @Inject() (repository: OrderRepository) {
 
-  /** An usecase of find an order */
+  /** An usecase of finding an order */
   def findOrder(orderId: Id[Order]): Option[Order] = repository.resolve(orderId)
 
   /** An usecase of placing an order */

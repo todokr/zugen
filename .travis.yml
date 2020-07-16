@@ -3,4 +3,4 @@ language: scala
 jdk: openjdk8
 
 script:
-  - sbt scalafmtCheckAll scalafmtSbtCheck scripted
+  - sbt scalafmtCheckAll scalafmtSbtCheck test scripted
