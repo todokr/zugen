@@ -67,7 +67,7 @@ object ZugenPlugin extends AutoPlugin {
   private val DocumentsToGenerateKey = "documentsToGenerate"
   private val DomainPackagesKey = "domainPackages"
   private val DomainObjectExcludePatternsKey = "domainObjectExcludePatterns"
-  private val MethodInvocationStartingPackageKey = "methodInvocationStartingPackage"
+  private val MethodInvocationRootPackageKey = "methodInvocationRootPackage"
   private val DocumentPathKey = "documentPath"
   private val ClassesPathKey = "classesPath"
 
@@ -84,7 +84,7 @@ object ZugenPlugin extends AutoPlugin {
       val domainPackages = getStringList(prop, DomainPackagesKey).map(DomainPackageName)
       val domainObjectExcludePatterns = getStringList(prop, DomainObjectExcludePatternsKey)
       val methodInvocationStartingPackage =
-        getString(prop, MethodInvocationStartingPackageKey).map(MethodInvocationRootPackage)
+        getString(prop, MethodInvocationRootPackageKey).map(MethodInvocationRootPackage)
       val documentPath = getString(prop, DocumentPathKey)
         .getOrElse((target.value / "zugen-docs").toString)
         .pipe(DocumentPath)
