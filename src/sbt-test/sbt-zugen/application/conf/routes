@@ -4,4 +4,5 @@ GET     /customer/:customerId controllers.CustomerController.get(customerId: Str
 POST    /customer             controllers.CustomerController.post()
 PUT     /customer             controllers.CustomerController.put()
 
+# B->C, B -> G,
 

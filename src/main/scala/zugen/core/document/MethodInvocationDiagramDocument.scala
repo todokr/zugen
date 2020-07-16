@@ -18,26 +18,8 @@ object MethodInvocationDiagramDocument {
         val allMethods = documentMaterial.elms.flatMap { material =>
           material.templateDefinition.methods
         }
-        val (startingMethods, restMethods) = allMethods.partition(_.pkg == startingPackage)
-        val invocations = (startingMethods ++ restMethods).flatMap { method =>
-          val from = InvocationItem(
-            itemId = genItemId(method),
-            pkg = method.pkg,
-            templateDefinitionName = method.templateDefinitionName,
-            methodName = method.methodName,
-            isTopLevel = method.pkg == startingPackage
-          )
-          method.invokeTargets.map { target =>
-            val to = InvocationItem(
-              itemId = genItemId(target),
-              pkg = target.pkg,
-              templateDefinitionName = target.templateDefinitionName,
-              methodName = target.methodName,
-              isTopLevel = target.pkg == startingPackage
-            )
-            Invocation(from, to)
-          }
-        }
+        val startingMethods = allMethods.filter(_.pkg == startingPackage)
+        val invocations = startingMethods.flatMap(buildInvocations(_, allMethods))
         MethodInvocationDiagramDocument(invocations)
       case None =>
         println(s"${Console.YELLOW}[WARN]${Console.RESET} Config for Method Invocation Diagram not found.")
@@ -45,13 +27,10 @@ object MethodInvocationDiagramDocument {
     }
   }
 
-  def genItemId(method: Method) =
-    s"${method.pkg.toString.replace(".", "_")}_${method.templateDefinitionName}_${method.methodName}"
+  final case class Invocation(from: InvocationItem, to: InvocationItem) {
+    override def toString: String = s"${from.methodName} --> ${to.methodName}"
+  }
 
-  def genItemId(target: InvokeTarget) =
-    s"${target.pkg.toString.replace(".", "_")}_${target.templateDefinitionName}_${target.methodName}"
-
-  final case class Invocation(from: InvocationItem, to: InvocationItem)
   final case class InvocationItem(
     itemId: String,
     pkg: Package,
@@ -60,59 +39,51 @@ object MethodInvocationDiagramDocument {
     isTopLevel: Boolean
   )
 
-  sealed trait InvocationTree
+  val LimitInvocationLevel = 100
 
-  object InvocationTree {
-
-    val LimitInvocationLevel = 100
-    final case class InvocationLeaf(
-      pkg: Package,
-      templateDefinitionName: TemplateDefinitionName,
-      methodName: MethodName,
-      level: Int
-    ) extends InvocationTree
-    final case class InvocationBranch(
-      pkg: Package,
-      templateDefinitionName: TemplateDefinitionName,
-      methodName: MethodName,
-      level: Int,
-      targets: Seq[InvocationTree]
-    ) extends InvocationTree
-
-    def construct(start: Method, allMethods: Seq[Method]): InvocationTree = {
-      // TODO tailrec
-      def _loop(invoker: Method, allMethods: List[Method], level: Int): InvocationTree = {
-        if (level >= LimitInvocationLevel)
-          throw new TooDeepMethodInvocationException(s"limit exceeded. method=${invoker}, limit=$LimitInvocationLevel")
-        invoker.invokeTargets match {
-          case targets if targets.isEmpty =>
-            InvocationLeaf(
-              pkg = invoker.pkg,
-              templateDefinitionName = invoker.templateDefinitionName,
-              methodName = invoker.methodName,
-              level = level
+  /** traverse method invocations and build invocation collection */
+  def buildInvocations(start: Method, allMethods: Seq[Method]): Seq[Invocation] = {
+    def _loop(invoker: Method, allMethods: Seq[Method], level: Int): Seq[Invocation] = {
+      if (level >= LimitInvocationLevel)
+        throw new TooDeepMethodInvocationException(s"limit exceeded. method=${invoker}, limit=$LimitInvocationLevel")
+      invoker.invokeTargets match {
+        case targets if targets.isEmpty => Seq.empty
+        case targets =>
+          val from = InvocationItem(
+            itemId = genItemId(invoker),
+            pkg = invoker.pkg,
+            templateDefinitionName = invoker.templateDefinitionName,
+            methodName = invoker.methodName,
+            isTopLevel = level == 0
+          )
+          val currentLevelInvocations = targets.map { next =>
+            val to = InvocationItem(
+              itemId = genItemId(next),
+              pkg = next.pkg,
+              templateDefinitionName = next.templateDefinitionName,
+              methodName = next.methodName,
+              isTopLevel = false
             )
-          case invokes =>
-            val nextMethods = invokes.flatMap { invoke =>
-              allMethods.filter { m =>
-                m.pkg == invoke.pkg &&
-                m.templateDefinitionName == invoke.templateDefinitionName &&
-                m.methodName == invoke.methodName
-              }
+            Invocation(from, to)
+          }
+          val nextMethods = targets.flatMap { invoke =>
+            allMethods.filter { m =>
+              m.pkg == invoke.pkg &&
+              m.templateDefinitionName == invoke.templateDefinitionName &&
+              m.methodName == invoke.methodName
             }
-            InvocationBranch(
-              pkg = invoker.pkg,
-              templateDefinitionName = invoker.templateDefinitionName,
-              methodName = invoker.methodName,
-              level = level,
-              targets = nextMethods.map(m => _loop(m, allMethods, level + 1))
-            )
-        }
+          }
+          currentLevelInvocations ++ nextMethods.flatMap(next => _loop(next, allMethods, level + 1))
       }
-      _loop(start, allMethods.toList, 0)
     }
-
-    class TooDeepMethodInvocationException(msg: String) extends Exception(msg)
+    _loop(start, allMethods, 0)
   }
 
+  def genItemId(method: Method) =
+    s"${method.pkg.toString.replace(".", "_")}_${method.templateDefinitionName}_${method.methodName}"
+
+  def genItemId(target: InvokeTarget) =
+    s"${target.pkg.toString.replace(".", "_")}_${target.templateDefinitionName}_${target.methodName}"
+
+  class TooDeepMethodInvocationException(msg: String) extends Exception(msg)
 }
