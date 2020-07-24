@@ -22,44 +22,41 @@ object DomainRelationDiagramDocument {
       .filter(_.templateDefinition.isInAnyPackage(domainPackages))
       .filterNot(elm => config.domainObjectExcludePatterns.exists(p => elm.templateDefinition.name.value.matches(p)))
 
-    val subGraphs = domainInternalElements
-      .groupBy(_.templateDefinition.pkg)
-      .map {
-        case (pkg, materials) =>
-          val nodes = materials.map(m => Node(m.templateDefinition))
-          val subGraphId = SubGraph.genId(pkg)
-          SubGraph(subGraphId, pkg.toString, nodes)
-      }
-      .toSeq
-
     val edges = domainInternalElements
       .flatMap { materialElm =>
         val template = materialElm.templateDefinition
         materialElm.references.elms.collect {
           // domain-internal -> domain-internal
           case ref: ProjectInternalInheritance if ref.definition.isInAnyPackage(domainPackages) =>
-            val from = Node.genId(template)
-            val to = Node.genId(ref.definition)
+            val from = Node.of(template, config)
+            val to = Node.of(ref.definition, config)
             DomainInternalInheritanceEdge(from, to)
           // domain-internal -> domain-external
           case ref: ProjectInternalInheritance =>
-            val from = Node.genId(template)
-            val toLabel = s"${ref.definition.pkg}.${ref.definition.name}"
-            DomainExternalInheritanceEdge(from, toLabel)
+            val from = Node.of(template, config)
+            val to = Node.of(ref.definition, config)
+            DomainExternalInheritanceEdge(from, to)
           // domain-internal -o domain-internal
           case ref: ProjectInternalProperty if ref.definition.isInAnyPackage(domainPackages) =>
-            val from = Node.genId(template)
-            val to = Node.genId(ref.definition)
+            val from = Node.of(template, config)
+            val to = Node.of(ref.definition, config)
             val propertyLabel = ref.memberName
             DomainInternalPropertyEdge(from, propertyLabel, to)
           // domain-internal -o domain-external
           case ref: ProjectInternalProperty =>
-            val from = Node.genId(template)
+            val from = Node.of(template, config)
             val propertyLabel = ref.memberName
-            val toLabel = s"${ref.definition.pkg}.${ref.definition.name}"
-            DomainExternalPropertyEdge(from, propertyLabel, toLabel)
+            val to = Node.of(ref.definition, config)
+            DomainExternalPropertyEdge(from, propertyLabel, to)
         }
       }
+
+    val nodes = edges.flatMap(edge => Seq(edge.to, edge.from))
+    val subGraphs = nodes.groupBy(_.pkg).map {
+      case (pkg, nodes) =>
+        val subGraphId = SubGraph.genId(pkg)
+        SubGraph(subGraphId, pkg.toString, nodes)
+    }.toSeq
 
     Digraph(
       label = "Domain object relations",
@@ -71,22 +68,29 @@ object DomainRelationDiagramDocument {
   final case class Digraph(label: String, subGraphs: Seq[SubGraph], edges: Seq[Edge])
   final case class SubGraph(id: SubGraphId, label: String, nodes: Seq[Node])
   sealed trait Edge {
-    def from: NodeId
+    def from: Node
+    def to: Node
   }
 
   /** edge of domain-internal inheritance */
-  final case class DomainInternalInheritanceEdge(from: NodeId, to: NodeId) extends Edge
+  final case class DomainInternalInheritanceEdge(from: Node, to: Node) extends Edge
 
   /** edge of inheritance of outside of domain */
-  final case class DomainExternalInheritanceEdge(from: NodeId, toLabel: String) extends Edge
+  final case class DomainExternalInheritanceEdge(from: Node, to: Node) extends Edge
 
   /** edge of domain-internal property */
-  final case class DomainInternalPropertyEdge(from: NodeId, propertyLabel: String, to: NodeId) extends Edge
+  final case class DomainInternalPropertyEdge(from: Node, propertyLabel: String, to: Node) extends Edge
 
   /** edge of property of outside of domain */
-  final case class DomainExternalPropertyEdge(from: NodeId, propertyLabel: String, toLabel: String) extends Edge
+  final case class DomainExternalPropertyEdge(from: Node, propertyLabel: String, to: Node) extends Edge
 
-  final case class Node(id: NodeId, name: String, alias: Option[String]) {
+  final case class Node(
+    id: NodeId,
+    pkg: Package,
+    name: String,
+    alias: Option[String],
+    fileUrl: Option[String]
+  ) {
     def label: String = alias.map(a => s"$name\n&quot;$a&quot;").getOrElse(name)
   }
 
@@ -101,11 +105,13 @@ object DomainRelationDiagramDocument {
     def genId(templateDefinition: TemplateDefinition): NodeId =
       NodeId(s"${templateDefinition.pkg.ids.map(_.value).mkString("_")}_${templateDefinition.name.value}")
 
-    def apply(templateDefinition: TemplateDefinition): Node = {
+    def of(templateDefinition: TemplateDefinition, config: Config): Node = {
       Node(
         id = genId(templateDefinition),
+        pkg = templateDefinition.pkg,
         name = templateDefinition.name.value,
-        alias = templateDefinition.scaladoc.map(_.firstLine) // alias should be in head of lines
+        alias = templateDefinition.scaladoc.map(_.firstLine), // alias should be in head of lines
+        fileUrl = config.githubBaseUrl.map(baseUrl => s"$baseUrl/${templateDefinition.fileName}")
       )
     }
   }

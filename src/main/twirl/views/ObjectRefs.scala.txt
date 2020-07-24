@@ -43,17 +43,21 @@ digraph domain_relation_diagram {
       pad = 10
 
       @for(node <- subGraph.nodes) {
-        @node.id [label = "@node.label"]
+        @node.fileUrl match {
+          case Some(url) => {@node.id [label = "@node.label", href="@url", target="_blank"]}
+          case None      => {@node.id [label = "@node.label"]}
+        }
+
       }
     }
   }
 
   @for(edge <- digraph.edges) {
     @edge match {
-      case DomainInternalInheritanceEdge(from, to) => { @from -> @to [arrowhead = normal ] }
-      case DomainExternalInheritanceEdge(from, to) => { @from -> @to [arrowhead = normal, color = "#ca3d3d" ] }
-      case DomainInternalPropertyEdge(from, propertyLabel, toLabel) => { @from -> "@toLabel" [ arrowhead = odiamond, label = @propertyLabel ] }
-      case DomainExternalPropertyEdge(from, propertyLabel, toLabel) => { @from -> "@toLabel" [ arrowhead = odiamond, label = @propertyLabel, color = "#ca3d3d" ] }
+      case DomainInternalInheritanceEdge(from, to) => { @from.id -> @to.id [arrowhead = normal ] }
+      case DomainExternalInheritanceEdge(from, to) => { @from.id -> @to.id [arrowhead = normal, color = "#ca3d3d" ] }
+      case DomainInternalPropertyEdge(from, propertyLabel, to) => { @from.id -> @to.id [ arrowhead = odiamond, label = @propertyLabel ] }
+      case DomainExternalPropertyEdge(from, propertyLabel, to) => { @from.id -> @to.id [ arrowhead = odiamond, label = @propertyLabel, color = "#ca3d3d" ] }
     }
   }
 }
