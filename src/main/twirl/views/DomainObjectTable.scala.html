@@ -19,7 +19,10 @@
         <td>@row.pkg</td>
         <td>@row.name</td>
         <td>@row.scaladoc</td>
-        <td>@row.fileName</td>
+        @row.fileUrl match {
+          case Some(url) => {<td><a href="@url" target="_blank">@row.fileName</a></td>}
+          case None      => {<td>@row.fileName</td>}
+        }
       </tr>
       }
       </tbody>
