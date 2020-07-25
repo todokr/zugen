@@ -1,10 +1,11 @@
 package zugen.core.document
 
 import zugen.core.config.Config
-import zugen.core.document.MethodInvocationDiagramDocument.Invocation
+import zugen.core.document.MethodInvocationDiagramDocument.Node.{ExternalNode, InternalNode}
+import zugen.core.document.MethodInvocationDiagramDocument.{Edge, Node}
 import zugen.core.models.{DocumentMaterials, InvokeTarget, Method, MethodName, Package, TemplateDefinitionName}
 
-final case class MethodInvocationDiagramDocument(invocations: Seq[Invocation]) extends Document {
+final case class MethodInvocationDiagramDocument(nodes: Seq[Node], edges: Seq[Edge]) extends Document {
   override val docCode: String = "method-invocation-diagram"
   override val docName: String = "Method Invocation Diagram"
 }
@@ -20,24 +21,48 @@ object MethodInvocationDiagramDocument {
         }
         val startingMethods = allMethods.filter(_.pkg == startingPackage)
         val invocations = startingMethods.flatMap(buildInvocations(_, allMethods))
-        MethodInvocationDiagramDocument(invocations)
+
+        val nodes: Seq[Node] = invocations.flatMap(i => Seq(i.from, i.to)).toSet
+          .map { item: InvocationItem =>
+            val material = documentMaterial.elms.find(elm =>
+              elm.templateDefinition.pkg == item.pkg && elm.templateDefinition.name == item.templateDefinitionName)
+            item -> material
+          }.collect {
+            case (item, Some(material)) =>
+              InternalNode(
+                id = NodeId(item.itemId),
+                pkg = item.pkg,
+                name = s"${item.templateDefinitionName}#${item.methodName}",
+                fileUrl =
+                  config.githubBaseUrl.map(baseUrl => s"$baseUrl/${material.templateDefinition.fileName.value}"),
+                isTopLevel = item.isTopLevel
+              )
+            case (item, _) =>
+              ExternalNode(
+                id = NodeId(item.itemId),
+                pkg = item.pkg,
+                name = s"${item.templateDefinitionName}#${item.methodName}"
+              )
+          }.toSeq
+        val edges = invocations.map(i => Edge(NodeId(i.from.itemId), NodeId(i.to.itemId)))
+        MethodInvocationDiagramDocument(nodes, edges)
       case None =>
         println(s"${Console.YELLOW}[WARN]${Console.RESET} Config for Method Invocation Diagram not found.")
-        MethodInvocationDiagramDocument(Seq.empty)
+        MethodInvocationDiagramDocument(Seq.empty, Seq.empty)
     }
   }
-
   final case class Invocation(from: InvocationItem, to: InvocationItem) {
-    override def toString: String = s"${from.methodName} --> ${to.methodName}"
+    override def toString: String = s"$from --> $to"
   }
-
   final case class InvocationItem(
     itemId: String,
     pkg: Package,
     templateDefinitionName: TemplateDefinitionName,
     methodName: MethodName,
     isTopLevel: Boolean
-  )
+  ) {
+    override def toString: String = s"$pkg.$templateDefinitionName#$methodName"
+  }
 
   val LimitInvocationLevel = 100
 
@@ -86,4 +111,33 @@ object MethodInvocationDiagramDocument {
     s"${target.pkg.toString.replace(".", "_")}_${target.templateDefinitionName}_${target.methodName}"
 
   class TooDeepMethodInvocationException(msg: String) extends Exception(msg)
+
+  sealed trait Node {
+    def id: NodeId
+    def pkg: Package
+    def name: String
+    def isTopLevel: Boolean
+  }
+  object Node {
+    final case class InternalNode(
+      id: NodeId,
+      pkg: Package,
+      name: String,
+      fileUrl: Option[String],
+      isTopLevel: Boolean
+    ) extends Node
+
+    final case class ExternalNode(
+      id: NodeId,
+      pkg: Package,
+      name: String
+    ) extends Node {
+      override val isTopLevel = false
+    }
+  }
+
+  final case class Edge(from: NodeId, to: NodeId)
+  final case class NodeId(value: String) extends AnyVal {
+    override def toString: String = value
+  }
 }

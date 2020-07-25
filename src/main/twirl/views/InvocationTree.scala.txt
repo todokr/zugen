@@ -1,7 +1,8 @@
-@import zugen.core.document.MethodInvocationDiagramDocument.Invocation
+@import zugen.core.document.MethodInvocationDiagramDocument.{Node, Edge}
+@import zugen.core.document.MethodInvocationDiagramDocument.Node.{ExternalNode, InternalNode}
 @import play.twirl.api.TwirlFeatureImports.defining
 
-@(invocations: Seq[Invocation])
+@(nodes: Seq[Node], edges: Seq[Edge])
 digraph "Method Invocation Diagram" {
   graph [
     rankdir = LR
@@ -15,7 +16,7 @@ digraph "Method Invocation Diagram" {
     colorscheme = rdylgn11
     shape = box
     fontname="Arial"
-    color = "#555555"
+    color = "#999999"
     fontsize = 10
     fontcolor = "#eeeeee"
     margin = 0.15
@@ -31,23 +32,26 @@ digraph "Method Invocation Diagram" {
     arrowsize = 0.5
   ]
 
-  @for(invocation <- invocations) {
-    @invocation.from.itemId -> @invocation.to.itemId
+  @for(edge <- edges) {
+    @edge.from -> @edge.to
   }
 
-  @defining(invocations.flatMap(i => Seq(i.from, i.to)).toSet) { items =>
-    @for(item <- items) {
-        @item.itemId [
-          label = <<font align="left" point-size="8">@item.pkg</font><br align="left" />@item.templateDefinitionName#@item.methodName>
-        ]
+
+  @for(node <- nodes) {
+      @node match {
+        case InternalNode(id, pkg, name, Some(fileUrl), _) => {@id [label = <<font align="left" point-size="8">@pkg</font><br align="left" />@name>, href="@fileUrl", target="_blank"]}
+        case InternalNode(id, pkg, name, _, _)             => {@id [label = <<font align="left" point-size="8">@pkg</font><br align="left" />@name>]}
+        case n: ExternalNode => {@n.id [label = <<font align="left" point-size="8">@n.pkg</font><br align="left" />@n.name>, color="#444444"]}
       }
 
-    @defining(items.filter(_.isTopLevel)) { topLevelItems =>
-      { rank = same;
-      @for(item <- topLevelItems) {
-        @item.itemId;
-      }
-      }
+    }
+
+  @defining(nodes.filter(_.isTopLevel)) { topLevelNodes =>
+    { rank = same;
+    @for(node <- topLevelNodes) {
+      @node.id;
+    }
     }
   }
+
 }
