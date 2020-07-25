@@ -3,7 +3,7 @@ package zugen.sbt
 import java.io.FileNotFoundException
 import java.util.Properties
 
-import scala.util.Using
+import scala.util.{Failure, Success, Try, Using}
 import scala.util.chaining._
 
 import sbt.Keys._
@@ -70,6 +70,7 @@ object ZugenPlugin extends AutoPlugin {
   private val MethodInvocationRootPackageKey = "methodInvocationRootPackage"
   private val DocumentPathKey = "documentPath"
   private val ClassesPathKey = "classesPath"
+  private val GithubBaseUrlKey = "githubBaseUrl"
 
   private def loadConfig: Def.Initialize[Task[Properties => Config]] =
     Def.task { prop =>
@@ -89,6 +90,13 @@ object ZugenPlugin extends AutoPlugin {
         .getOrElse((target.value / "zugen-docs").toString)
         .pipe(DocumentPath)
       val classesPath = getString(prop, ClassesPathKey).getOrElse(classDirectory.value.toString).pipe(ClassesPath)
+      val githubBaseUrl = getString(prop, GithubBaseUrlKey).map { baseUrl =>
+        val endSlashRemoved = if (baseUrl.endsWith("/")) baseUrl.init else baseUrl
+        Try(new URL(endSlashRemoved)) match {
+          case Failure(_)   => throw new Exception(s"URL specified with $GithubBaseUrlKey is not valid.")
+          case Success(url) => url
+        }
+      }
 
       Config(
         documentsToGenerate = documentsToGenerate,
@@ -96,9 +104,10 @@ object ZugenPlugin extends AutoPlugin {
         domainObjectExcludePatterns = domainObjectExcludePatterns,
         methodInvocationStartingPackage = methodInvocationStartingPackage,
         documentPath = documentPath,
-        classesPath = classesPath
+        classesPath = classesPath,
+        githubBaseUrl = githubBaseUrl
       ).tap { config =>
-        println(s"${scala.Console.BLUE}[INFO]${scala.Console.RESET} loaded config: $config")
+        println(s"${scala.Console.BLUE}[INFO!]${scala.Console.RESET} loaded config: $config")
       }
     }
 

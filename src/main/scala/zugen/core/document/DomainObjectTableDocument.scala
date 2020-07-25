@@ -23,7 +23,8 @@ object DomainObjectTableDocument {
           pkg = elm.templateDefinition.pkg,
           name = elm.templateDefinition.name,
           scaladoc = elm.templateDefinition.scaladoc.map(_.content).getOrElse(""),
-          fileName = elm.templateDefinition.fileName
+          fileName = elm.templateDefinition.fileName,
+          fileUrl = config.githubBaseUrl.map(baseUrl => s"$baseUrl/${elm.templateDefinition.fileName}")
         )
     }.pipe(DomainObjectTableDocument(_))
   }
@@ -32,6 +33,7 @@ object DomainObjectTableDocument {
     pkg: Package,
     name: TemplateDefinitionName,
     scaladoc: String,
-    fileName: FileName
+    fileName: FileName,
+    fileUrl: Option[String]
   )
 }
