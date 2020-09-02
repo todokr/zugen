@@ -15,7 +15,7 @@ A table of domain objects under the specified packages.
 This is useful as a glossary of domain terms.
 
 - [x] List package, class/trait name, scaladoc and file path
-- [ ] Jump to GitHub source
+- [x] Jump to GitHub source
 - [ ] Show numbers of referrer
 
 ![Domain object table](https://user-images.githubusercontent.com/2328540/87659631-d4f4f080-c798-11ea-9ead-d8162a57aff4.png)
@@ -29,7 +29,7 @@ A diagram which indicates relation among domain objects.
 - [x] Show properties
 - [x] Highlight references which is bound to outside of domain package in red
 - [x] Show argument names of constructors as labels on edges
-- [ ] Jump to GitHub source
+- [x] Jump to GitHub source
 - [ ] Filter by package name etc.
 
 ![Domain relation diagram](https://user-images.githubusercontent.com/2328540/87659632-d4f4f080-c798-11ea-910e-40dcfac45293.png)
@@ -40,7 +40,7 @@ A diagram which shows method invocation chain.
 
 - [x] Show project-internal method invocations
 - [x] Show invocations of external libraries
-- [ ] Jump to GitHub source
+- [x] Jump to GitHub source
 - [ ] Highlight nodes and edges responsive to user interaction
 
 ![Metho invocation diagram](https://user-images.githubusercontent.com/2328540/87659630-d3c3c380-c798-11ea-9103-0436e92d4a40.png)
@@ -64,13 +64,14 @@ methodInvocationRootPackage=controllers     # The root package of method invocat
 
 ##### keys
 
-| key                         | description                                                               | available values                                   | default           | example                                                         |
-|-----------------------------|---------------------------------------------------------------------------|----------------------------------------------------|-------------------|-----------------------------------------------------------------|
-| documentsToGenerate         | Document types to generate.<br>If empty, generates all kind of documents. | `domain-object-table`<br>`domain-relation-diagram` | *empty*           | documentsToGenerate=domain-object-table,domain-relation-diagram |
-| domainPackages              | Package names which represent domain.                                     | *comma separated string*                           | *empty*           | domainPackages=app1.domain,app2.domain                          |
-| domainObjectExcludePatterns | Regex patterns to exclude classes from domain relation diagram.           | *comma separated string*                           | *empty*           | domainObjectExcludePatterns=".+Repository"                      |
-| methodInvocationRootPackage | The root package of method invocation diagram                             | *string*                                           | *empty*           | methodInvocationRootPackage=controller                          |
-| documentPath                | Directory to output documents                                             | *string*                                           | target/zugen-docs | documentPath=docs                                               |
+| key                         | description                                                               | available values                                   | default           | example                                                                                      |
+|-----------------------------|---------------------------------------------------------------------------|----------------------------------------------------|-------------------|----------------------------------------------------------------------------------------------|
+| documentsToGenerate         | Document types to generate.<br>If empty, generates all kind of documents. | `domain-object-table`<br>`domain-relation-diagram` | *empty*           | documentsToGenerate=domain-object-table,domain-relation-diagram                              |
+| domainPackages              | Package names which represent domain.                                     | *comma separated string*                           | *empty*           | domainPackages=app1.domain,app2.domain                                                       |
+| domainObjectExcludePatterns | Regex patterns to exclude classes from domain relation diagram.           | *comma separated string*                           | *empty*           | domainObjectExcludePatterns=".+Repository"                                                   |
+| methodInvocationRootPackage | The root package of method invocation diagram                             | *string*                                           | *empty*           | methodInvocationRootPackage=controller                                                       |
+| documentPath                | Directory to output documents                                             | *string*                                           | target/zugen-docs | documentPath=docs                                                                            |
+| githubBaseUrl               | The base URL of source code in GitHub repository                          | *string*                                           | *empty*           | githubBaseUrl=https://github.com/todokr/zugen/blob/trunk/src/sbt-test/sbt-zugen/application/ |
 
 #### build.sbt
 
