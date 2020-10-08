@@ -57,7 +57,7 @@ addSbtPlugin("io.github.todokr" % "sbt-zugen" % "2020.9.1")
 #### project/zugen.properties
 
 ```properties
-domainPackages=domain                       # Package name which represens domain
+domainPackages=domain                       # Package name which represent domain
 domainObjectExcludePatterns=".+Repository"  # Regex patterns to exclude classes from domain relation diagram
 methodInvocationRootPackage=controllers     # The root package of method invocation diagram
 ```
@@ -75,7 +75,7 @@ methodInvocationRootPackage=controllers     # The root package of method invocat
 
 #### build.sbt
 
-Zugen loads source code infomation from SemainticDB. 
+Zugen loads source code information from SemanticDB. 
 
 ```sbt
 addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full)
