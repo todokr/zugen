@@ -1,0 +1,10 @@
+# check if the SemanticDB file created
+> compile
+$ exists target/scala-2.13/classes/META-INF/semanticdb
+
+> zugen
+$ exists target/zugen-docs/index.html
+$ exists target/zugen-docs/domain-object-table.html
+$ exists target/zugen-docs/domain-relation-diagram.html
+$ exists target/zugen-docs/method-invocation-diagram.html
+$ exists target/zugen-docs/assets/style.css

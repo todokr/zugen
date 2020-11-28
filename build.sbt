@@ -3,7 +3,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "sbt-zugen",
     organization := "io.github.todokr",
-    version := "2020.11.0",
+    version := "2020.12.0-SNAPSHOT",
     scriptedLaunchOpts := {
       scriptedLaunchOpts.value ++
         Seq("-Xmx1024M", "-Dplugin.version=" + version.value)

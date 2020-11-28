@@ -1,0 +1,46 @@
+package controllers
+
+import domain.Id
+import domain.model.order.{Order, OrderStatus}
+import javax.inject._
+import play.api.libs.json._
+import play.api.mvc._
+import services.OrderService
+import services.OrderService.PlaceOrderCommand
+
+@Singleton
+class OrderController @Inject() (
+  service: OrderService,
+  val controllerComponents: ControllerComponents
+) extends BaseController {
+  import OrderController._
+
+  def get(rawOrderId: String): Action[AnyContent] =
+    Action { implicit request =>
+      service.findOrder(Id(rawOrderId))
+        .map(order => Ok(Json.toJson(order)))
+        .getOrElse(NotFound)
+    }
+
+  def post(): Action[JsValue] =
+    Action(parse.json) { implicit request =>
+      request.body.validate[PlaceOrderCommand].fold(
+        _ => BadRequest,
+        command => {
+          service.placeOrder(command)
+          Created
+        }
+      )
+    }
+}
+
+object OrderController extends BaseFormats {
+
+  implicit def commandReads: Reads[PlaceOrderCommand] = Json.reads[PlaceOrderCommand]
+  implicit def orderStatusWrites: Writes[OrderStatus] =
+    Writes {
+      case OrderStatus.Placed    => JsString("placed")
+      case OrderStatus.Completed => JsString("completed")
+    }
+  implicit def orderWrites: Writes[Order] = Json.writes[Order]
+}

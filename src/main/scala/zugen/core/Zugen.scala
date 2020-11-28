@@ -1,5 +1,6 @@
 package zugen.core
 
+import java.io.File
 import java.nio.file.{Files, Path}
 import java.time.{Clock, LocalDateTime}
 
@@ -20,13 +21,13 @@ object Zugen {
   val documentWriter: DocumentWriter = HtmlDocumentWriter
   val clock: Clock = Clock.systemDefaultZone()
 
-  def generateDocs(config: Config): GeneratedDocumentPath = {
+  def generateDocs(config: Config, projectStructure: ProjectStructure): GeneratedDocumentPath = {
     val generatedAt = LocalDateTime.now(clock)
     if (!config.documentPath.exists) {
       Files.createDirectories(config.documentPath.value)
     }
 
-    val documentMaterial = materialLoader.load(config)
+    val documentMaterial = materialLoader.load(Seq.empty)
     val zugenDocuments = config.documentsToGenerate.genDocTypes.map {
       case GenDomainObjectTable       => DomainObjectTableDocument.of(documentMaterial, config)
       case GenDomainRelationDiagram   => DomainRelationDiagramDocument.of(documentMaterial, config)
@@ -42,5 +43,6 @@ object Zugen {
     )
   }
 
+  case class ProjectStructure(dependencies: Seq[File])
   case class GeneratedDocumentPath(index: Path, pages: Seq[Path])
 }

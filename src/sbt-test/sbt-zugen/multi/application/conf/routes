@@ -1,0 +1,7 @@
+GET     /order/:orderId       controllers.OrderController.get(orderId: String)
+POST    /order                controllers.OrderController.post()
+GET     /customer/:customerId controllers.CustomerController.get(customerId: String)
+POST    /customer             controllers.CustomerController.post()
+PUT     /customer             controllers.CustomerController.put()
+
+
