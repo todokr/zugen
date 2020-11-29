@@ -1,0 +1,6 @@
+> project application
+> zugen
+$ exists application/target/zugen-docs/index.html
+$ exists application/target/zugen-docs/domain-object-table.html
+$ exists application/target/zugen-docs/domain-relation-diagram.html
+$ exists application/target/zugen-docs/assets/style.css

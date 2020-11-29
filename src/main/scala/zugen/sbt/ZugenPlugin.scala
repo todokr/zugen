@@ -1,20 +1,24 @@
 package zugen.sbt
 
 import java.io.FileNotFoundException
+import java.nio.file.Files
 import java.util.Properties
 
-import scala.util.{Failure, Success, Try, Using}
 import scala.util.chaining._
+import scala.util.{Failure, Success, Try, Using}
 
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{AutoPlugin, Compile, Def, IO, Test, inConfig, taskKey, _}
 import zugen.core.Zugen
+import zugen.core.Zugen.ProjectStructure
 import zugen.core.config._
 
 trait PluginInterface {
   val zugen = taskKey[Unit]("Generate zugen documents")
   val zugenConfig = taskKey[Config]("Zugen configuration")
+
+  val ztest = taskKey[Unit]("Generate zugen documents")
 }
 
 object ZugenPlugin extends AutoPlugin {
@@ -24,8 +28,37 @@ object ZugenPlugin extends AutoPlugin {
 
   object autoImport extends PluginInterface
   import autoImport._
-
+  /*
+-=============================
+domain
+setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.coreDefaultSettings) Defaults.scala,1958)
+setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.paths) Defaults.scala,379)
+setting(ScopedKey(This / Select(ConfigKey(compile)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
+setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
+-=============================
+infra
+setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.coreDefaultSettings) Defaults.scala,1958)
+setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.paths) Defaults.scala,379)
+setting(ScopedKey(This / Select(ConfigKey(compile)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
+setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
+[success] Total time: 0 s, completed 2020/11/25 19:16:58
+   */
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
+    ztest := {
+      val bs = buildStructure.value
+      val projectDependencies = thisProject.value.dependencies
+        .map(dep => Project.getProject(dep.project, bs))
+        .collect { case Some(project) => project }
+
+      projectDependencies.foreach { p =>
+        import scala.jdk.CollectionConverters._
+        Files.walk(p.base.toPath, 5)
+          .iterator().asScala.filter { f =>
+            Files.isDirectory(f) && f.getFileName.toString == "classes"
+          }.foreach(println)
+      }
+
+    },
     zugen := {
       compile.value
       val config = zugenConfig.value
@@ -35,7 +68,13 @@ object ZugenPlugin extends AutoPlugin {
         IO.transfer(cssIn, config.documentPath.value.resolve("assets/style.css").toFile)
       }
 
-      val generatedPath = Zugen.generateDocs(config)
+      val bs = buildStructure.value
+      val dependencyBaseDirs = thisProject.value.dependencies.map { dep =>
+        Project.getProject(dep.project, bs)
+      }.collect { case Some(p) => p.base }
+      val projectStructure = ProjectStructure.of(dependencyBaseDirs)
+
+      val generatedPath = Zugen.generateDocs(config, projectStructure)
       generatedPath.pages.foreach { page =>
         println(s"${scala.Console.GREEN}Generated${scala.Console.RESET}: $page")
       }
