@@ -1,12 +1,12 @@
 package zugen.sbt
 
 import java.io.FileNotFoundException
+import java.nio.file.Files
 import java.util.Properties
 
 import scala.util.chaining._
 import scala.util.{Failure, Success, Try, Using}
 
-import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion.Setting
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{AutoPlugin, Compile, Def, IO, Test, inConfig, taskKey, _}
@@ -51,16 +51,11 @@ setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LineP
         .collect { case Some(project) => project }
 
       projectDependencies.foreach { p =>
-        println("-=============================")
-        println(p.id)
-        val ts = p.settings.collect {
-          case s if s.key.key == Keys.target.key => {
-            println(s.key.scope)
-            s.asInstanceOf[SettingKey[File]]
-          }
-
-        }
-        ts.foreach(println)
+        import scala.jdk.CollectionConverters._
+        Files.walk(p.base.toPath, 5)
+          .iterator().asScala.filter { f =>
+            Files.isDirectory(f) && f.getFileName.toString == "classes"
+          }.foreach(println)
       }
 
     },
@@ -72,12 +67,12 @@ setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LineP
       Using(getClass.getClassLoader.getResourceAsStream("assets/style.css")) { cssIn =>
         IO.transfer(cssIn, config.documentPath.value.resolve("assets/style.css").toFile)
       }
-      val bs = buildStructure.value
 
-      val projectDependencies = thisProject.value.dependencies
-        .map(dep => Project.getProject(dep.project, bs))
-        .collect { case Some(project) => project.base }
-      val projectStructure = ProjectStructure(projectDependencies)
+      val bs = buildStructure.value
+      val dependencyBaseDirs = thisProject.value.dependencies.map { dep =>
+        Project.getProject(dep.project, bs)
+      }.collect { case Some(p) => p.base }
+      val projectStructure = ProjectStructure.of(dependencyBaseDirs)
 
       val generatedPath = Zugen.generateDocs(config, projectStructure)
       generatedPath.pages.foreach { page =>

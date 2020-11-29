@@ -7,9 +7,6 @@ ThisBuild / libraryDependencies += compilerPlugin(
   "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full)
 ThisBuild / scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 
-lazy val root = (project in file("."))
-  .aggregate(application, domain, infra)
-
 lazy val application = (project in file("application"))
   .enablePlugins(PlayScala)
   .settings(
