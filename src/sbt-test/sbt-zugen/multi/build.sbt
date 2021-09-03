@@ -2,9 +2,9 @@ name := """multi-project application"""
 organization := "com.example"
 version := "1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "2.13.3"
+ThisBuild / scalaVersion := "2.13.6"
 ThisBuild / libraryDependencies += compilerPlugin(
-  "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full)
+  "org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full)
 ThisBuild / scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 
 lazy val application = (project in file("application"))

@@ -5,14 +5,14 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.6"
 
 libraryDependencies ++= Seq(
   guice,
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 )
 addCompilerPlugin(
-  "org.scalameta" %% "semanticdb-scalac" % "4.3.17" cross CrossVersion.full
+  "org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full
 )
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 // Adds additional packages into Twirl
