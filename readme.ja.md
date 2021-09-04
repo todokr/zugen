@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/todokr/zugen.svg?branch=trunk)](https://travis-ci.org/todokr/zugen)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/sbt-zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/sbt-zugen) 
 
-[日本語版](./readme.ja.md)
+[English ver.](./readme.md)
 
 Scalaプロジェクト向けの、アーキテクチャ図やドキュメントを生成するsbtプラグインです。
 
