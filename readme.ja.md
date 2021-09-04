@@ -1,46 +1,45 @@
 # Zugen
 
 [![Build Status](https://travis-ci.org/todokr/zugen.svg?branch=trunk)](https://travis-ci.org/todokr/zugen)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/sbt-zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/sbt-zugen)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.todokr/sbt-zugen/badge.svg)](https://search.maven.org/artifact/io.github.todokr/sbt-zugen) 
 
-[English ver.](./readme.md)
+[日本語版](./readme.ja.md)
 
-An architecture diagram generator for Scala project.
+Scalaプロジェクト向けの、アーキテクチャ図やドキュメントを生成するsbtプラグインです。
 
-## Documents to be generated
+## 生成されるアーキテクチャ図やドキュメントの種類
 
-These following screenshots are generated in [the example Scala project](https://github.com/todokr/zugen/tree/trunk/src/sbt-test/sbt-zugen/application).
+以下のスクリーンショットは [サンプルプロジェクト](https://github.com/todokr/zugen/tree/trunk/src/sbt-test/sbt-zugen/application)に対してZugenを実行した結果です。
 
 ### Domain object table
 
-A table of domain objects under the specified packages.  
-This is useful as a glossary of domain terms.
+ドメインオブジェクトが含まれるとして指定したパッケージ以下の、オブジェクトたちの一覧表です。
+ドメインオブジェクトがドメインの用語と対応関係にあるか、などを確認する際に便利です。
 
-- [x] List package, class/trait name, scaladoc and file path
-- [x] Jump to GitHub source
+- [x] パッケージやclass/trait名、scaladoc、ファイルパスの一覧
+- [x] GitHubのソースへのジャンプ
 
 ![Domain object table](https://user-images.githubusercontent.com/2328540/87659631-d4f4f080-c798-11ea-9ead-d8162a57aff4.png)
 
 ### Domain relation diagram
 
-A diagram which indicates relation among domain objects.
+ドメインオブジェクト同士の関連を示す図です。
 
-- [x] Show class/trait name with its alias in scaladoc
-- [x] Show inheritance relations
-- [x] Show properties
-- [x] Highlight references which is bound to outside of domain package in red
-- [x] Show argument names of constructors as labels on edges
-- [x] Jump to GitHub source
+- [x] class/trait名とscaladocの表示
+- [x] 継承関係の図示
+- [x] classやtraitのプロパティの表示
+- [x] ドメイン以外のパッケージに依存するドメインオブジェクトの参照を赤くハイライト
+- [x] GitHubのソースへのジャンプ
 
 ![Domain relation diagram](https://user-images.githubusercontent.com/2328540/87659632-d4f4f080-c798-11ea-910e-40dcfac45293.png)
 
 ### Method Invocation Diagram
 
-A diagram which shows method invocation chain.
+特定のパッケージ（controller用パッケージなど）を起点に、メソッドの呼び出し関係を示す図です。
 
-- [x] Show project-internal method invocations
-- [x] Show invocations of external libraries
-- [x] Jump to GitHub source
+- [x] プロジェクト内部のクラス同士の呼び出しを可視化
+- [x] 外部ライブラリの呼び出しを（薄いグレーで）可視化
+- [x] GitHubのソースへのジャンプ
 
 ![Method invocation diagram](https://user-images.githubusercontent.com/2328540/87659630-d3c3c380-c798-11ea-9103-0436e92d4a40.png)
 
@@ -65,20 +64,20 @@ methodInvocationRootPackage=example.controllers # The root package of method inv
 
 | key                         | description                                                               | available values                                                                  | default           | example                                                                                      |
 |-----------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------|-------------------|----------------------------------------------------------------------------------------------|
-| documentsToGenerate         | Document types to generate.<br>If empty, generates all kind of documents. | `domain-object-table`<br>`domain-relation-diagram`<br>`method-invocation-diagram` | *empty*           | documentsToGenerate=domain-object-table,domain-relation-diagram,method-invocation-diagram    |
-| domainPackages              | Package names which represent domain.                                     | *comma separated string*                                                          | *empty*           | domainPackages=app1.domain,app2.domain                                                       |
-| domainObjectExcludePatterns | Regex patterns to exclude classes from domain relation diagram.           | *comma separated string*                                                          | *empty*           | domainObjectExcludePatterns=".+Repository"                                                   |
-| methodInvocationRootPackage | The root package of method invocation diagram                             | *string*                                                                          | *empty*           | methodInvocationRootPackage=controller                                                       |
-| documentPath                | Directory to output documents                                             | *string*                                                                          | target/zugen-docs | documentPath=docs                                                                            |
-| githubBaseUrl               | The base URL of source code in GitHub repository                          | *string*                                                                          | *empty*           | githubBaseUrl=https://github.com/todokr/zugen/blob/trunk/src/sbt-test/sbt-zugen/application/ |
+| documentsToGenerate         | 出力するドキュメントタイプです。<br>空の場合、全種類のドキュメントが生成されます。         | `domain-object-table`<br>`domain-relation-diagram`<br>`method-invocation-diagram` | *empty*           | documentsToGenerate=domain-object-table,domain-relation-diagram,method-invocation-diagram    |
+| domainPackages              | ドメインオブジェクトが含まれるパッケージを指定します。                                | *comma separated string*                                                          | *empty*           | domainPackages=app1.domain,app2.domain                                                       |
+| domainObjectExcludePatterns | Domain relation diagram に表示させないクラスを、正規表現で指定できます。              | *comma separated string*                                                          | *empty*           | domainObjectExcludePatterns=".+Repository"                                                   |
+| methodInvocationRootPackage | Method invocation diagram における呼び出しの起点となるパッケージです。               | *string*                                                                          | *empty*           | methodInvocationRootPackage=controller                                                       |
+| documentPath                | Zugenのドキュメントを出力するディレクトリです。                                    | *string*                                                                          | target/zugen-docs | documentPath=docs                                                                            |
+| githubBaseUrl               | GitHubのソースへのジャンプを行うためのベースとなる、リポジトリURLです                   | *string*                                                                          | *empty*           | githubBaseUrl=https://github.com/todokr/zugen/blob/trunk/src/sbt-test/sbt-zugen/application/ |
 
 #### build.sbt
 
-Zugen loads source code information from [SemanticDB](https://scalameta.org/docs/semanticdb/guide.html).
-There are 2 ways to enable SemanticDB file generation.
+Zugen はソースコードの情報を [SemanticDB](https://scalameta.org/docs/semanticdb/guide.html) から収集しています。
+SemanticDB のファイルを生成する手段は2つあります。
 
-##### Using sbt option
-From 1.13, sbt supports SemanticDB generation.
+##### sbtのオプションを使う
+1.13より、sbt は SemanticDB の生成をサポートしています。
 
 ```sbt
 ThisBuild / semanticdbEnabled := true
@@ -86,7 +85,7 @@ ThisBuild / semanticdbVersion := "4.4.27"
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 ```
 
-##### Using compiler plugin
+##### compiler plugin の利用
 
 ```sbt
 addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full)
@@ -99,12 +98,12 @@ scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 $ sbt zugen
 ```
 
-Then, zugen diagrams are generated under the directory specified with `documentPath` setting (default is `target/zugen-docs`).
+実行すると、`documentPath` で設定したディレクトリ （デフォルトは `target/zugen-docs`) に、Zugenのドキュメントが生成されます。
 
-If any question you have, please feel free to contact me on [Twitter](https://twitter.com/todokr).
+質問などは気軽に [Twitter](https://twitter.com/todokr)でご連絡ください。
 
 ## Thanks
-Zugen is inspired by JIG, which is a document generator for Java project and its philosophy.  
+Zugen Javaプロジェクトのドキュメント生成ツールである JIG の哲学にインスパイアされています。
 
 - [JIG](https://github.com/dddjava/jig)
 - [コードをどまんなかに据えた設計アプローチ](https://speakerdeck.com/irof/kodowodomannakaniju-etashe-ji-apuroti)
