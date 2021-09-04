@@ -8,6 +8,14 @@ final case class Config(
   domainObjectExcludePatterns: Seq[String],
   methodInvocationStartingPackage: Option[MethodInvocationRootPackage],
   documentPath: DocumentPath,
-  classesPath: ClassesPath,
   githubBaseUrl: Option[URL]
-)
+) {
+  override def toString: String =
+    s"""
+       |documentsToGenerate: ${documentsToGenerate.genDocTypes.map(_.code).mkString(", ")},
+       |domainPackages: ${domainPackages.map(_.value).mkString(", ")}
+       |domainObjectExcludePatterns: ${domainObjectExcludePatterns.mkString(", ")}
+       |methodInvocationStartingPackage: ${methodInvocationStartingPackage.map(_.value).getOrElse("-")}
+       |documentPath: ${documentPath.value}
+       |githubBaseUrl: ${githubBaseUrl.map(_.toString).getOrElse("-")}""".stripMargin
+}

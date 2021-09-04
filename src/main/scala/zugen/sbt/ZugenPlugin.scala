@@ -1,7 +1,6 @@
 package zugen.sbt
 
 import java.io.FileNotFoundException
-import java.nio.file.Files
 import java.util.Properties
 
 import scala.util.chaining._
@@ -11,7 +10,7 @@ import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import sbt.{AutoPlugin, Compile, Def, IO, Test, inConfig, taskKey, _}
 import zugen.core.Zugen
-import zugen.core.Zugen.ProjectStructure
+import zugen.core.Zugen.{DependentProject, ProjectId, ProjectStructure, TargetProject}
 import zugen.core.config._
 
 trait PluginInterface {
@@ -21,7 +20,7 @@ trait PluginInterface {
   val ztest = taskKey[Unit]("Generate zugen documents")
 }
 
-object ZugenPlugin extends AutoPlugin {
+object ZugenPlugin extends AutoPlugin with SlashSyntax {
 
   override def requires: Plugins = JvmPlugin
   override def trigger: PluginTrigger = allRequirements
@@ -31,19 +30,7 @@ object ZugenPlugin extends AutoPlugin {
 
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
     ztest := {
-      val bs = buildStructure.value
-      val projectDependencies = thisProject.value.dependencies
-        .map(dep => Project.getProject(dep.project, bs))
-        .collect { case Some(project) => project }
-
-      projectDependencies.foreach { p =>
-        import scala.jdk.CollectionConverters._
-        Files.walk(p.base.toPath, 5)
-          .iterator().asScala.filter { f =>
-            Files.isDirectory(f) && f.getFileName.toString == "classes"
-          }.foreach(println)
-      }
-
+      println("hey, now I'm do nothing")
     },
     zugen := {
       compile.value
@@ -54,12 +41,17 @@ object ZugenPlugin extends AutoPlugin {
         IO.transfer(cssIn, config.documentPath.value.resolve("assets/style.css").toFile)
       }
 
-      val bs = buildStructure.value
-
-      val dependencyBaseDirs = thisProject.value.dependencies.map { dep =>
-        Project.getProject(dep.project, bs)
-      }.collect { case Some(p) => p.base }
-      val projectStructure = ProjectStructure.of(dependencyBaseDirs)
+      val targetProject = TargetProject(ProjectId(thisProject.value.id), thisProject.value.base)
+      val dependentProjects = {
+        val bs = buildStructure.value
+        thisProject.value.dependencies.map { dep =>
+          Project.getProject(dep.project, bs)
+        }.collect {
+          case Some(project) =>
+            DependentProject(ProjectId(project.id), project.base)
+        }
+      }
+      val projectStructure = ProjectStructure(targetProject, dependentProjects)
 
       val generatedPath = Zugen.generateDocs(config, projectStructure)
       generatedPath.pages.foreach { page =>
@@ -83,7 +75,7 @@ object ZugenPlugin extends AutoPlugin {
     val prop = new java.util.Properties()
     if (file(PropFileName).exists()) {
       IO.load(prop, file(PropFileName))
-      if (prop.isEmpty) println(s"${scala.Console.YELLOW}[WARN]${scala.Console.RESET} $PropFileName is empty")
+      if (prop.isEmpty) println(s"${scala.Console.YELLOW}$PropFileName is empty${scala.Console.RESET} ")
       Right(prop)
     } else {
       Left(new FileNotFoundException(s"setting file not found: $PropFileName"))
@@ -95,7 +87,6 @@ object ZugenPlugin extends AutoPlugin {
   private val DomainObjectExcludePatternsKey = "domainObjectExcludePatterns"
   private val MethodInvocationRootPackageKey = "methodInvocationRootPackage"
   private val DocumentPathKey = "documentPath"
-  private val ClassesPathKey = "classesPath"
   private val GithubBaseUrlKey = "githubBaseUrl"
 
   private def loadConfig: Def.Initialize[Task[Properties => Config]] =
@@ -115,7 +106,6 @@ object ZugenPlugin extends AutoPlugin {
       val documentPath = getString(prop, DocumentPathKey)
         .getOrElse((target.value / "zugen-docs").toString)
         .pipe(DocumentPath)
-      val classesPath = getString(prop, ClassesPathKey).getOrElse(classDirectory.value.toString).pipe(ClassesPath)
       val githubBaseUrl = getString(prop, GithubBaseUrlKey).map { baseUrl =>
         val endSlashRemoved = if (baseUrl.endsWith("/")) baseUrl.init else baseUrl
         Try(new URL(endSlashRemoved)) match {
@@ -130,10 +120,9 @@ object ZugenPlugin extends AutoPlugin {
         domainObjectExcludePatterns = domainObjectExcludePatterns,
         methodInvocationStartingPackage = methodInvocationStartingPackage,
         documentPath = documentPath,
-        classesPath = classesPath,
         githubBaseUrl = githubBaseUrl
       ).tap { config =>
-        println(s"${scala.Console.BLUE}[INFO!]${scala.Console.RESET} loaded config: $config")
+        println(s"${scala.Console.BLUE}Loaded config${scala.Console.RESET}: $config")
       }
     }
 

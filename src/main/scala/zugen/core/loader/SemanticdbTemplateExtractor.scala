@@ -11,7 +11,7 @@ import zugen.core.models.Modifier.AccessibilityModifier
 import zugen.core.models.TemplateDefinition.{ClassDefinition, ObjectDefinition, TraitDefinition}
 import zugen.core.models._
 
-trait SemanticDBTemplateExtractor {
+trait SemanticdbTemplateExtractor {
 
   /** Extract templates from TextDocuments of SemanticDB */
   def extractTemplateDefinitions(docs: Seq[TextDocument]): TemplateDefinitions =
