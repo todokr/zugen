@@ -76,7 +76,7 @@ methodInvocationRootPackage=example.controllers # The root package of method inv
 Zugen はソースコードの情報を [SemanticDB](https://scalameta.org/docs/semanticdb/guide.html) から収集しています。
 SemanticDB のファイルを生成する手段は2つあります。
 
-##### sbtのオプションを使う
+##### sbtオプション
 1.13より、sbt は SemanticDB の生成をサポートしています。
 
 ```sbt
@@ -85,7 +85,7 @@ ThisBuild / semanticdbVersion := "4.4.27"
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 ```
 
-##### compiler plugin の利用
+##### compiler plugin
 
 ```sbt
 addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full)
