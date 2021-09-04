@@ -9,7 +9,7 @@ scalaVersion := "2.13.6"
 
 libraryDependencies ++= Seq(
   guice,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
 )
 addCompilerPlugin(
   "org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full

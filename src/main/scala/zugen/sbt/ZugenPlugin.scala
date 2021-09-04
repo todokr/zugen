@@ -28,21 +28,7 @@ object ZugenPlugin extends AutoPlugin {
 
   object autoImport extends PluginInterface
   import autoImport._
-  /*
--=============================
-domain
-setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.coreDefaultSettings) Defaults.scala,1958)
-setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.paths) Defaults.scala,379)
-setting(ScopedKey(This / Select(ConfigKey(compile)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
-setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
--=============================
-infra
-setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.coreDefaultSettings) Defaults.scala,1958)
-setting(ScopedKey(This / This / This,target)) at LinePosition((sbt.Defaults.paths) Defaults.scala,379)
-setting(ScopedKey(This / Select(ConfigKey(compile)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
-setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LinePosition((sbt.Defaults.outputConfigPaths) Defaults.scala,470)
-[success] Total time: 0 s, completed 2020/11/25 19:16:58
-   */
+
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
     ztest := {
       val bs = buildStructure.value
@@ -69,6 +55,7 @@ setting(ScopedKey(This / Select(ConfigKey(test)) / Select(doc),target)) at LineP
       }
 
       val bs = buildStructure.value
+
       val dependencyBaseDirs = thisProject.value.dependencies.map { dep =>
         Project.getProject(dep.project, bs)
       }.collect { case Some(p) => p.base }
