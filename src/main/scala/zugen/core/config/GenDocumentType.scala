@@ -1,19 +1,16 @@
 package zugen.core.config
 
-sealed trait GenDocumentType
+import scala.util.chaining._
+
+sealed abstract class GenDocumentType(val code: String)
 
 object GenDocumentType {
 
-  def from(code: String): Option[GenDocumentType] = {
-    code match {
-      case "domain-object-table"       => Some(GenDomainObjectTable)
-      case "domain-relation-diagram"   => Some(GenDomainRelationDiagram)
-      case "method-invocation-diagram" => Some(GenMethodInvocationDiagram)
-      case other =>
-        println(s"${Console.YELLOW}[WARN]${Console.RESET} no such document type: $other")
-        None
+  def from(code: String): Option[GenDocumentType] =
+    values.find(_.code == code).tap {
+      case None => println(s"${Console.YELLOW}no such document type: $code${Console.RESET}")
+      case _    =>
     }
-  }
   val values: Seq[GenDocumentType] =
     Seq(
       GenDomainObjectTable,
@@ -22,11 +19,11 @@ object GenDocumentType {
     )
 
   /** table of domain objects */
-  case object GenDomainObjectTable extends GenDocumentType
+  case object GenDomainObjectTable extends GenDocumentType("domain-object-table")
 
   /** relation diagram of domain objects */
-  case object GenDomainRelationDiagram extends GenDocumentType
+  case object GenDomainRelationDiagram extends GenDocumentType("domain-relation-diagram")
 
   /** method invocation diagram */
-  case object GenMethodInvocationDiagram extends GenDocumentType
+  case object GenMethodInvocationDiagram extends GenDocumentType("method-invocation-diagram")
 }

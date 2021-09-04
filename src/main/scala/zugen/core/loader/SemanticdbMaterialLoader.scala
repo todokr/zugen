@@ -6,20 +6,26 @@ import scala.jdk.CollectionConverters._
 import scala.meta.internal.semanticdb
 import scala.util.chaining._
 
-import zugen.core.config.ClassesPath
+import zugen.core.Zugen.ProjectStructure
 import zugen.core.models.{DocumentMaterial, DocumentMaterials}
 
-object SemanticDBMaterialLoader extends MaterialLoader with SemanticDBTemplateExtractor {
+/** Loads source code information with Semanticdb */
+object SemanticdbMaterialLoader extends MaterialLoader with SemanticdbTemplateExtractor {
 
-  def load(classesPaths: Seq[ClassesPath]): DocumentMaterials = {
-    val semanticdbFiles = classesPaths.flatMap { classesPath =>
-      val semanticdbRoot = classesPath.value.resolve("META-INF/semanticdb")
-
-      Files.walk(semanticdbRoot)
+  def load(project: ProjectStructure): DocumentMaterials = {
+    val semanticdbFiles = project.allProject.flatMap { project =>
+      val semanticdbDirs = Files.walk(project.buildArtifactDir.toPath)
         .iterator()
         .asScala
-        .filter(_.getFileName.toString.endsWith(".semanticdb"))
-        .toList
+        .filter(f => f.getFileName.endsWith("semanticdb") && Files.isDirectory(f))
+
+      semanticdbDirs.flatMap { dir =>
+        Files.walk(dir)
+          .iterator()
+          .asScala
+          .filter(_.getFileName.toString.endsWith(".semanticdb"))
+          .toList
+      }
     }
 
     val documents = semanticdbFiles.flatMap { file =>
