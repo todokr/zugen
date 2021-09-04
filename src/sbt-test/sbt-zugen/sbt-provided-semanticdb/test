@@ -1,6 +1,6 @@
 # check if the SemanticDB file created
 > compile
-$ exists target/scala-2.13/classes/META-INF/semanticdb
+$ exists target/scala-2.13/meta/META-INF/semanticdb
 
 > zugen
 $ exists target/zugen-docs/index.html
