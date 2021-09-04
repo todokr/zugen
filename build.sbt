@@ -3,7 +3,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "sbt-zugen",
     organization := "io.github.todokr",
-    version := "2021.9.0-SNAPSHOT",
+    version := "2021.9.0",
     scriptedLaunchOpts := {
       scriptedLaunchOpts.value ++
         Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
@@ -50,3 +50,4 @@ publishTo := {
   else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
 publishMavenStyle := true
+credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
