@@ -1,15 +1,15 @@
 package zugen.core.loader
 
+import zugen.core.loader.ReferredSymbol.InvokedSymbol
+import zugen.core.models.Modifier.AccessibilityModifier
+import zugen.core.models.TemplateDefinition.{ClassDefinition, ObjectDefinition, TraitDefinition}
+import zugen.core.models._
+
 import scala.meta._
 import scala.meta.contrib.{DocToken, ScaladocParser}
 import scala.meta.internal.semanticdb.SymbolOccurrence.Role
 import scala.meta.internal.semanticdb.{SymbolOccurrence, TextDocument}
 import scala.util.chaining._
-
-import zugen.core.loader.ReferredSymbol.InvokedSymbol
-import zugen.core.models.Modifier.AccessibilityModifier
-import zugen.core.models.TemplateDefinition.{ClassDefinition, ObjectDefinition, TraitDefinition}
-import zugen.core.models._
 
 trait SemanticdbTemplateExtractor {
 
@@ -19,7 +19,7 @@ trait SemanticdbTemplateExtractor {
       .flatMap { doc =>
         println(s"processing... ${doc.uri}")
         val fileName = FileName(doc.uri)
-        val source = doc.text.parse[Source].get
+        val source = dialects.Scala(doc.text).parse[Source].get
         val pkg = source.collect { case p: Pkg => p.ref.toString }.mkString(".").pipe(Package)
         val referredSymbols = doc.occurrences.collect {
           case SymbolOccurrence(Some(range), symbol, Role.REFERENCE) => ReferredSymbol.of(symbol, range)

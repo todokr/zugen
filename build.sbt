@@ -3,7 +3,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "sbt-zugen",
     organization := "io.github.todokr",
-    version := "2021.9.0",
+    version := "2021.12.0-SNAPSHOT",
     scriptedLaunchOpts := {
       scriptedLaunchOpts.value ++
         Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
@@ -19,7 +19,7 @@ lazy val root = (project in file("."))
       "-Ywarn-unused"
     ),
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "scalameta" % "4.4.27",
+      "org.scalameta" %% "scalameta" % "4.4.31",
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.1" % Test
     ),

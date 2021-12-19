@@ -29,6 +29,7 @@ object SemanticdbMaterialLoader extends MaterialLoader with SemanticdbTemplateEx
     }
 
     val documents = semanticdbFiles.flatMap { file =>
+      println(s"parsing: ${file.getFileName}")
       semanticdb.TextDocuments.parseFrom(Files.readAllBytes(file)).documents
     }
 

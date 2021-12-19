@@ -29,9 +29,6 @@ object ZugenPlugin extends AutoPlugin with SlashSyntax {
   import autoImport._
 
   lazy val baseZugenSettings: Seq[Def.Setting[_]] = Seq(
-    ztest := {
-      println("hey, now I'm do nothing")
-    },
     zugen := {
       compile.value
       val config = zugenConfig.value
