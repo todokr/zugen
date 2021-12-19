@@ -50,7 +50,7 @@ A diagram which shows method invocation chain.
 #### project/plugins.sbt
 
 ```sbt
-addSbtPlugin("io.github.todokr" % "sbt-zugen" % "2021.9.0")
+addSbtPlugin("io.github.todokr" % "sbt-zugen" % "2021.12.0")
 ```
 
 #### project/zugen.properties
