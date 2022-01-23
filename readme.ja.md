@@ -88,7 +88,7 @@ scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 ##### compiler plugin
 
 ```sbt
-addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.4.27" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" %% "semanticdb-scalac" % "4.4.33" cross CrossVersion.full)
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 ```
 
