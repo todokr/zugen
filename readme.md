@@ -82,7 +82,7 @@ From 1.13, sbt supports SemanticDB generation.
 
 ```sbt
 ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := "4.4.27"
+ThisBuild / semanticdbVersion := "4.4.33"
 scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 ```
 
