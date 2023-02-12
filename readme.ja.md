@@ -103,7 +103,7 @@ $ sbt zugen
 質問などは気軽に [Twitter](https://twitter.com/todokr)でご連絡ください。
 
 ## Thanks
-Zugen Javaプロジェクトのドキュメント生成ツールである JIG の哲学にインスパイアされています。
+Zugen はJavaプロジェクトのドキュメント生成ツールである JIG の哲学にインスパイアされています。
 
 - [JIG](https://github.com/dddjava/jig)
 - [コードをどまんなかに据えた設計アプローチ](https://speakerdeck.com/irof/kodowodomannakaniju-etashe-ji-apuroti)
